@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { Button, Card, Group, Stack, Text, FileButton, Grid, Badge, Image as MantineImage, Alert, Collapse, Skeleton } from "@mantine/core";
 import { FileAudio, Upload, AlertCircle } from "lucide-react";
-// @ts-ignore
-const jsmediatags = typeof window !== "undefined" ? require("jsmediatags/dist/jsmediatags.min.js") : null;
+import { parseBlob } from 'music-metadata';
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
 import { useUsageLimit } from "@/hooks/useUsageLimit";
 
@@ -56,7 +55,7 @@ export function AudioMetadataCore() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setAiInsight(data.insight);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setAiInsight("Failed to generate AI insight.");
     } finally {
@@ -96,17 +95,30 @@ export function AudioMetadataCore() {
     setError(null);
     setMetadata(null);
 
-    jsmediatags.read(file, {
-      onSuccess: function(tag: any) {
-        setMetadata(tag.tags);
-        setLoading(false);
-      },
-      onError: function(error: any) {
-        console.error("Error reading tags:", error);
-        setError("Failed to read audio metadata. File might not contain ID3 tags.");
-        setLoading(false);
-      }
-    });
+    try {
+      const parsedMetadata = await parseBlob(file);
+      const common = parsedMetadata.common;
+      
+      setMetadata({
+        title: common.title,
+        artist: common.artist,
+        album: common.album,
+        year: common.year?.toString(),
+        genre: common.genre?.join(", "),
+        track: common.track?.no?.toString(),
+        picture: common.picture && common.picture.length > 0 
+          ? {
+              format: common.picture[0].format,
+              data: Array.from(common.picture[0].data)
+            }
+          : undefined
+      });
+      setLoading(false);
+    } catch (err) {
+      console.error("Error reading tags:", err);
+      setError("Failed to read audio metadata. File might not contain supported tags.");
+      setLoading(false);
+    }
   };
 
   // Create Object URL for image data
