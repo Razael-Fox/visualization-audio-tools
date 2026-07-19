@@ -98,7 +98,7 @@ export function AIInsightPanel({
                 }
               }}
             >
-              {insightResult.replace(/\\b(\\d{1,2}:\\d{2}(?::\\d{2})?)\\b/g, '\`$1\`')}
+              {insightResult.replace(/\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g, '`$1`')}
             </ReactMarkdown>
           </Stack>
         )}
