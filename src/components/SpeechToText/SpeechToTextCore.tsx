@@ -137,7 +137,7 @@ export function SpeechToTextCore() {
           </FileButton>
         </Group>
 
-        <Collapse in={!!file}>
+        <Collapse expanded={!!file}>
           <Stack gap="md" mt="md">
             <Group justify="space-between" p="sm" className="bg-gray-50 dark:bg-dark-600 rounded-md border border-gray-100 dark:border-dark-500">
               <Text size="sm" fw={500} truncate className="flex-1">
@@ -159,7 +159,7 @@ export function SpeechToTextCore() {
               </Text>
             )}
 
-            <Collapse in={loading || !!transcription}>
+            <Collapse expanded={loading || !!transcription}>
               <Stack gap="sm">
                 <Group justify="space-between" align="center">
                   <Text fw={500} size="sm" c="dimmed">Result:</Text>

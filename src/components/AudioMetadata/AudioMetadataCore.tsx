@@ -145,7 +145,7 @@ export function AudioMetadataCore() {
           </Text>
         )}
 
-        <Collapse in={!!metadata || loading}>
+        <Collapse expanded={!!metadata || loading}>
           {loading ? (
             <Grid mt="md" gap="xl">
               <Grid.Col span={{ base: 12, md: 4 }}>
