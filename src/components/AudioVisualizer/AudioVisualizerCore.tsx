@@ -254,7 +254,7 @@ export function AudioVisualizerCore() {
           </FileButton>
         </Group>
 
-        <Collapse in={!!audioFileName}>
+        <Collapse expanded={!!audioFileName}>
           <Stack gap="md" mt="md">
             <Text size="sm" c="dimmed">
               Loaded: <span className="font-medium text-gray-700 dark:text-gray-300">{audioFileName}</span>
