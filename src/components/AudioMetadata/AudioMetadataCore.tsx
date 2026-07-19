@@ -14,6 +14,7 @@ interface AudioMetadata {
   album?: string;
   year?: string;
   genre?: string;
+  track?: string;
   picture?: {
     format: string;
     data: number[];
@@ -26,6 +27,7 @@ export function AudioMetadataCore() {
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileSize, setFileSize] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<string | null>(null);
 
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -49,7 +51,7 @@ export function AudioMetadataCore() {
       const res = await fetch("/api/ai/summarize-meta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ metadata, fileName, fileSize }),
+        body: JSON.stringify({ metadata, fileName, fileSize, fileType }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -89,6 +91,7 @@ export function AudioMetadataCore() {
     
     setFileName(file.name);
     setFileSize(formatSize(file.size));
+    setFileType(file.type || "audio/unknown");
     setLoading(true);
     setError(null);
     setMetadata(null);
@@ -202,6 +205,9 @@ export function AudioMetadataCore() {
                       <Grid.Col span={4}><Text size="sm" c="dimmed">File Size:</Text></Grid.Col>
                       <Grid.Col span={8}><Text size="sm" fw={500}>{fileSize}</Text></Grid.Col>
                       
+                      <Grid.Col span={4}><Text size="sm" c="dimmed">File Type:</Text></Grid.Col>
+                      <Grid.Col span={8}><Badge color="gray" variant="light">{fileType}</Badge></Grid.Col>
+                      
                       <Grid.Col span={4}><Text size="sm" c="dimmed">Title:</Text></Grid.Col>
                       <Grid.Col span={8}><Text size="sm" fw={500}>{metadata.title || "—"}</Text></Grid.Col>
                       
@@ -213,6 +219,9 @@ export function AudioMetadataCore() {
                       
                       <Grid.Col span={4}><Text size="sm" c="dimmed">Year:</Text></Grid.Col>
                       <Grid.Col span={8}><Text size="sm" fw={500}>{metadata.year || "—"}</Text></Grid.Col>
+
+                      <Grid.Col span={4}><Text size="sm" c="dimmed">Track:</Text></Grid.Col>
+                      <Grid.Col span={8}><Text size="sm" fw={500}>{metadata.track || "—"}</Text></Grid.Col>
                       
                       <Grid.Col span={4}><Text size="sm" c="dimmed">Genre:</Text></Grid.Col>
                       <Grid.Col span={8}>

@@ -39,18 +39,16 @@ export function AIInsightPanel({
         </Group>
         
         <Group gap="sm">
-          {!insightResult && (
-            <Button 
-              size="xs" 
-              variant="light" 
-              color={color} 
-              onClick={onGenerate} 
-              loading={loading}
-              leftSection={<Sparkles size={14} />}
-            >
-              Generate Insight
-            </Button>
-          )}
+          <Button 
+            size="xs" 
+            variant="light" 
+            color={color} 
+            onClick={onGenerate} 
+            loading={loading}
+            leftSection={<Sparkles size={14} />}
+          >
+            {insightResult ? "Regenerate" : "Generate Insight"}
+          </Button>
           <Button variant="subtle" size="xs" color="gray" p={4} onClick={() => setOpened(!opened)}>
             {opened ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </Button>
