@@ -4,14 +4,16 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 
-const UPLOAD_LIMIT = 5;
-const AI_LIMIT = 3;
+const DEFAULT_UPLOAD_LIMIT = 5;
+const DEFAULT_AI_LIMIT = 3;
 const MAX_DURATION_SEC = 600; // 10 minutes
 
 export function useUsageLimit() {
   const [user, setUser] = useState<User | null>(null);
   const [uploadCount, setUploadCount] = useState(0);
   const [aiCount, setAiCount] = useState(0);
+  const [maxUploads, setMaxUploads] = useState(DEFAULT_UPLOAD_LIMIT);
+  const [maxAi, setMaxAi] = useState(DEFAULT_AI_LIMIT);
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Load auth state
@@ -40,13 +42,16 @@ export function useUsageLimit() {
         try {
           const { data, error } = await supabase
             .from('usage_limits')
-            .select('upload_count, ai_generate_count, reset_at')
+            .select('upload_count, ai_generate_count, reset_at, max_upload_count, max_ai_generate_count')
             .eq('user_id', user.id)
             .single();
           
           if (!isMounted) return;
 
           if (data) {
+            setMaxUploads(data.max_upload_count ?? DEFAULT_UPLOAD_LIMIT);
+            setMaxAi(data.max_ai_generate_count ?? DEFAULT_AI_LIMIT);
+            
             // check if reset_at has passed
             if (new Date(data.reset_at) < new Date()) {
                await supabase.from('usage_limits').update({ 
@@ -66,9 +71,13 @@ export function useUsageLimit() {
                user_id: user.id,
                upload_count: 0,
                ai_generate_count: 0,
+               max_upload_count: DEFAULT_UPLOAD_LIMIT,
+               max_ai_generate_count: DEFAULT_AI_LIMIT,
              });
              setUploadCount(0);
              setAiCount(0);
+             setMaxUploads(DEFAULT_UPLOAD_LIMIT);
+             setMaxAi(DEFAULT_AI_LIMIT);
           }
         } catch (err) {
           console.error("Supabase limit fetch error:", err);
@@ -133,13 +142,13 @@ export function useUsageLimit() {
     user,
     uploadCount,
     aiCount,
-    canUpload: uploadCount < UPLOAD_LIMIT,
-    canGenerateAi: aiCount < AI_LIMIT,
+    canUpload: uploadCount < maxUploads,
+    canGenerateAi: aiCount < maxAi,
     incrementUpload,
     incrementAi,
     checkDuration,
-    maxUploads: UPLOAD_LIMIT,
-    maxAi: AI_LIMIT,
+    maxUploads,
+    maxAi,
     maxDurationSec: MAX_DURATION_SEC
   };
 }

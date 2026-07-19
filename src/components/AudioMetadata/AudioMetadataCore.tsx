@@ -27,6 +27,7 @@ export function AudioMetadataCore() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileSize, setFileSize] = useState<string | null>(null);
   const [fileType, setFileType] = useState<string | null>(null);
+  const [loadProgress, setLoadProgress] = useState(0);
 
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -64,11 +65,9 @@ export function AudioMetadataCore() {
   };
 
   const formatSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    if (bytes === 0) return "0 MB";
+    const mb = bytes / (1024 * 1024);
+    return mb.toFixed(2) + " MB";
   };
 
   const handleFileUpload = async (file: File | null) => {
@@ -92,8 +91,18 @@ export function AudioMetadataCore() {
     setFileSize(formatSize(file.size));
     setFileType(file.type || "audio/unknown");
     setLoading(true);
+    setLoadProgress(0);
     setError(null);
     setMetadata(null);
+
+    // Simulate real-time progress during parsing
+    const progressInterval = setInterval(() => {
+      setLoadProgress((prev) => {
+        if (prev >= 90) return prev;
+        // Random increment between 5 and 15
+        return prev + Math.floor(Math.random() * 10) + 5;
+      });
+    }, 50);
 
     try {
       const parsedMetadata = await parseBlob(file);
@@ -113,11 +122,19 @@ export function AudioMetadataCore() {
             }
           : undefined
       });
-      setLoading(false);
+      
+      setLoadProgress(100);
+      setTimeout(() => {
+        setLoading(false);
+        setLoadProgress(0);
+      }, 400); // brief pause at 100% before resetting
     } catch (err) {
       console.error("Error reading tags:", err);
       setError("Failed to read audio metadata. File might not contain supported tags.");
       setLoading(false);
+      setLoadProgress(0);
+    } finally {
+      clearInterval(progressInterval);
     }
   };
 
@@ -147,8 +164,35 @@ export function AudioMetadataCore() {
           </Group>
           <FileButton onChange={handleFileUpload} accept="audio/*">
             {(props) => (
-              <Button {...props} leftSection={<Upload size={16} />} variant="light" color="metadata" loading={loading}>
-                Select Audio File
+              <Button 
+                {...props} 
+                leftSection={!loading && <Upload size={16} />} 
+                variant={loading ? "filled" : "light"} 
+                color={loading ? "dark" : "metadata"}
+                disabled={loading}
+                style={{
+                  position: 'relative',
+                  overflow: 'hidden',
+                  transition: 'background-color 0.3s ease'
+                }}
+              >
+                {loading && (
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      height: '100%',
+                      width: `${loadProgress}%`,
+                      backgroundColor: 'var(--mantine-color-metadata-filled)',
+                      transition: 'width 0.1s ease-out',
+                      zIndex: 0
+                    }}
+                  />
+                )}
+                <span style={{ position: 'relative', zIndex: 1 }}>
+                  {loading ? `Processing... ${loadProgress}%` : 'Select Audio File'}
+                </span>
               </Button>
             )}
           </FileButton>
