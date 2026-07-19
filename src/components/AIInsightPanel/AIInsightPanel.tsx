@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Group, Text, Button, Collapse, Stack, Loader, ThemeIcon } from "@mantine/core";
+import { Card, Group, Text, Button, Collapse, Stack, Loader, ThemeIcon, Badge } from "@mantine/core";
 import { Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface AIInsightPanelProps {
   title: string;
@@ -65,9 +67,39 @@ export function AIInsightPanel({
 
         {insightResult && !loading && (
           <Stack gap="sm" className="bg-white dark:bg-dark-700 p-4 rounded-md border border-gray-100 dark:border-dark-500 shadow-sm mt-2">
-            <Text size="sm" className="whitespace-pre-line leading-relaxed">
-              {insightResult}
-            </Text>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code(props) {
+                  const { children, className, node, ...rest } = props;
+                  const text = String(children);
+                  const isTimestamp = /^\\d{1,2}:\\d{2}(?::\\d{2})?$/.test(text);
+                  
+                  if (isTimestamp) {
+                    return <Badge size="sm" variant="light" color={color} className="font-mono">{text}</Badge>;
+                  }
+                  
+                  return <code className={className} {...rest}>{children}</code>;
+                },
+                p(props) {
+                  return <Text size="sm" mb="xs" className="leading-relaxed">{props.children}</Text>;
+                },
+                strong(props) {
+                  return <Text component="span" fw={700}>{props.children}</Text>;
+                },
+                ul(props) {
+                  return <ul className="list-disc pl-5 mb-2 text-sm">{props.children}</ul>;
+                },
+                ol(props) {
+                  return <ol className="list-decimal pl-5 mb-2 text-sm">{props.children}</ol>;
+                },
+                li(props) {
+                  return <li className="mb-1">{props.children}</li>;
+                }
+              }}
+            >
+              {insightResult.replace(/\\b(\\d{1,2}:\\d{2}(?::\\d{2})?)\\b/g, '\`$1\`')}
+            </ReactMarkdown>
           </Stack>
         )}
       </Collapse>
