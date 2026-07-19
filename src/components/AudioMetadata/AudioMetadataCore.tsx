@@ -121,7 +121,7 @@ export function AudioMetadataCore() {
 
         {metadata && (
           <>
-            <Grid mt="md" gutter="xl">
+            <Grid mt="md" gap="xl">
               <Grid.Col span={{ base: 12, md: 4 }}>
                 <div className="flex flex-col items-center p-4 bg-gray-50 dark:bg-dark-600 rounded-lg border border-gray-100 dark:border-dark-500">
                   {coverArtUrl ? (

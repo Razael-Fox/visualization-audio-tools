@@ -47,7 +47,7 @@ export default function Home() {
         </Group>
       </div>
 
-      <Grid gutter="xl" mt={50}>
+      <Grid gap="xl" mt={50}>
         {features.map((feature) => (
           <Grid.Col key={feature.title} span={{ base: 12, md: 4 }}>
             <Card shadow="sm" padding="xl" radius="md" withBorder className="h-full flex flex-col hover:-translate-y-1 transition-transform duration-200">
