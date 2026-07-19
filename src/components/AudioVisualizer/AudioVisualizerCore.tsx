@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import { Button, Card, Group, Stack, Text, FileButton, ActionIcon, Slider, Alert, Collapse, Skeleton, useMantineTheme, useComputedColorScheme } from "@mantine/core";
-import { Play, Pause, Square, Upload, Sparkles, AlertCircle, Activity } from "lucide-react";
+import { Play, Pause, Square, Upload, AlertCircle, Activity } from "lucide-react";
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
 import { useUsageLimit } from "@/hooks/useUsageLimit";
 

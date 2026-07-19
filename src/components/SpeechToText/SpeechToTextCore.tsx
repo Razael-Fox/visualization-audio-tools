@@ -1,9 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Card, Group, Stack, Text, FileButton, Textarea, ActionIcon, CopyButton, Tooltip, Alert, Collapse, Skeleton } from "@mantine/core";
-import { Mic, Upload, Copy, Check, Download, AlertCircle } from "lucide-react";
-import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
+import {
+  Button,
+  Card,
+  Group,
+  Stack,
+  Text,
+  FileButton,
+  Textarea,
+  ActionIcon,
+  CopyButton,
+  Tooltip,
+  Alert,
+  Collapse,
+  Skeleton,
+  Loader,
+} from "@mantine/core";
+import {
+  Mic,
+  Upload,
+  Copy,
+  Check,
+  Download,
+  AlertCircle,
+  Sparkles,
+} from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useUsageLimit } from "@/hooks/useUsageLimit";
 
 export function SpeechToTextCore() {
@@ -16,19 +40,27 @@ export function SpeechToTextCore() {
   const [aiLoading, setAiLoading] = useState(false);
   const [limitError, setLimitError] = useState<string | null>(null);
 
-  const { canUpload, canGenerateAi, incrementUpload, incrementAi, checkDuration } = useUsageLimit();
+  const {
+    canUpload,
+    canGenerateAi,
+    incrementUpload,
+    incrementAi,
+    checkDuration,
+  } = useUsageLimit();
 
   const handleGenerateInsight = async () => {
     if (!transcription) return;
     setLimitError(null);
-    
+
     if (!canGenerateAi) {
-      setLimitError("You have reached the AI generation limit for this session.");
+      setLimitError(
+        "You have reached the AI generation limit for this session.",
+      );
       return;
     }
-    
+
     await incrementAi();
-    
+
     setAiLoading(true);
     try {
       const res = await fetch("/api/ai/correct-stt", {
@@ -50,12 +82,14 @@ export function SpeechToTextCore() {
   const handleFileUpload = async (selectedFile: File | null) => {
     if (!selectedFile) return;
     setLimitError(null);
-    
+
     if (!canUpload) {
-      setLimitError("You have reached the maximum upload limit for this session.");
+      setLimitError(
+        "You have reached the maximum upload limit for this session.",
+      );
       return;
     }
-    
+
     const isValidDuration = await checkDuration(selectedFile);
     if (!isValidDuration) {
       setLimitError("Audio file exceeds the 10-minute duration limit.");
@@ -116,21 +150,46 @@ export function SpeechToTextCore() {
     <Card withBorder shadow="sm" radius="md" p="xl" className="w-full">
       <Stack gap="lg">
         {limitError && (
-          <Alert icon={<AlertCircle size={16} />} title="Usage Limit Reached" color="red" variant="light" withCloseButton onClose={() => setLimitError(null)}>
-            {limitError} Please <a href="https://www.razael-fox.my.id/go/discord" target="_blank" rel="noreferrer" className="underline">Join our Discord</a> for more info.
+          <Alert
+            icon={<AlertCircle size={16} />}
+            title="Usage Limit Reached"
+            color="red"
+            variant="light"
+            withCloseButton
+            onClose={() => setLimitError(null)}
+          >
+            {limitError} Please{" "}
+            <a
+              href="https://www.razael-fox.my.id/go/discord"
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              Join our Discord
+            </a>{" "}
+            for more info.
           </Alert>
         )}
         <Group justify="space-between" align="flex-start">
           <Group gap="sm" align="center">
             <Mic size={28} className="text-teal-500" />
             <div>
-              <Text fw={700} size="xl">Speech to Text</Text>
-              <Text size="sm" c="dimmed">Transcribe audio files into text accurately</Text>
+              <Text fw={700} size="xl">
+                Speech to Text
+              </Text>
+              <Text size="sm" c="dimmed">
+                Transcribe audio files into text accurately
+              </Text>
             </div>
           </Group>
           <FileButton onChange={handleFileUpload} accept="audio/*">
             {(props) => (
-              <Button {...props} leftSection={<Upload size={16} />} variant="light" color="stt">
+              <Button
+                {...props}
+                leftSection={<Upload size={16} />}
+                variant="light"
+                color="stt"
+              >
                 Select Audio
               </Button>
             )}
@@ -139,14 +198,18 @@ export function SpeechToTextCore() {
 
         <Collapse expanded={!!file}>
           <Stack gap="md" mt="md">
-            <Group justify="space-between" p="sm" className="bg-gray-50 dark:bg-dark-600 rounded-md border border-gray-100 dark:border-dark-500">
+            <Group
+              justify="space-between"
+              p="sm"
+              className="bg-gray-50 dark:bg-dark-600 rounded-md border border-gray-100 dark:border-dark-500"
+            >
               <Text size="sm" fw={500} truncate className="flex-1">
                 {file?.name}
               </Text>
-              <Button 
-                size="sm" 
-                color="stt" 
-                onClick={handleTranscribe} 
+              <Button
+                size="sm"
+                color="stt"
+                onClick={handleTranscribe}
                 loading={loading}
               >
                 Transcribe Now
@@ -154,7 +217,12 @@ export function SpeechToTextCore() {
             </Group>
 
             {error && (
-              <Text c="red" size="sm" p="sm" className="bg-red-50 dark:bg-red-900/20 rounded-md">
+              <Text
+                c="red"
+                size="sm"
+                p="sm"
+                className="bg-red-50 dark:bg-red-900/20 rounded-md"
+              >
                 {error}
               </Text>
             )}
@@ -162,28 +230,56 @@ export function SpeechToTextCore() {
             <Collapse expanded={loading || !!transcription}>
               <Stack gap="sm">
                 <Group justify="space-between" align="center">
-                  <Text fw={500} size="sm" c="dimmed">Result:</Text>
-                  
+                  <Text fw={500} size="sm" c="dimmed">
+                    Result:
+                  </Text>
+
                   {transcription && !loading && (
                     <Group gap="xs">
+                      <Tooltip label="AI Correction & Summary" withArrow>
+                        <ActionIcon
+                          color="stt"
+                          variant="subtle"
+                          onClick={handleGenerateInsight}
+                          loading={aiLoading}
+                        >
+                          <Sparkles size={16} />
+                        </ActionIcon>
+                      </Tooltip>
                       <CopyButton value={transcription} timeout={2000}>
                         {({ copied, copy }) => (
-                          <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
-                            <ActionIcon color={copied ? 'stt' : 'gray'} variant="subtle" onClick={copy}>
-                              {copied ? <Check size={16} /> : <Copy size={16} />}
+                          <Tooltip
+                            label={copied ? "Copied" : "Copy"}
+                            withArrow
+                            position="right"
+                          >
+                            <ActionIcon
+                              color={copied ? "stt" : "gray"}
+                              variant="subtle"
+                              onClick={copy}
+                            >
+                              {copied ? (
+                                <Check size={16} />
+                              ) : (
+                                <Copy size={16} />
+                              )}
                             </ActionIcon>
                           </Tooltip>
                         )}
                       </CopyButton>
                       <Tooltip label="Download as .txt" withArrow>
-                        <ActionIcon color="stt" variant="subtle" onClick={handleDownload}>
+                        <ActionIcon
+                          color="stt"
+                          variant="subtle"
+                          onClick={handleDownload}
+                        >
                           <Download size={16} />
                         </ActionIcon>
                       </Tooltip>
                     </Group>
                   )}
                 </Group>
-                
+
                 {loading ? (
                   <Stack gap="xs" mt="sm" mb="sm">
                     <Skeleton height={20} radius="sm" width="100%" animate />
@@ -200,20 +296,74 @@ export function SpeechToTextCore() {
                     maxRows={15}
                     readOnly
                     className="w-full"
-                    styles={{ input: { fontFamily: 'inherit' } }}
+                    styles={{ input: { fontFamily: "inherit" } }}
                   />
                 )}
-                
-                {!loading && transcription && (
-                  <AIInsightPanel 
-                    title="AI Correction & Summary" 
-                    description="Fix transcription errors, add punctuation, and get a quick summary."
-                    insightResult={aiInsight}
-                    loading={aiLoading}
-                    onGenerate={handleGenerateInsight}
-                    color="stt"
-                  />
-                )}
+
+                <Collapse expanded={aiLoading || !!aiInsight}>
+                  <Stack gap="xs" mt="sm">
+                    <Text fw={500} size="sm" c="dimmed">
+                      AI Correction & Summary:
+                    </Text>
+                    {aiLoading ? (
+                      <Group
+                        justify="center"
+                        py="md"
+                        className="bg-gray-50 dark:bg-dark-700 rounded-md border border-gray-200 dark:border-dark-600"
+                      >
+                        <Loader size="sm" color="stt" type="dots" />
+                        <Text size="sm" c="dimmed">
+                          AI is analyzing...
+                        </Text>
+                      </Group>
+                    ) : (
+                      <div className="bg-white dark:bg-dark-700 p-3.5 rounded-md border border-gray-200 dark:border-dark-600 text-sm">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            p(props) {
+                              return (
+                                <Text
+                                  size="sm"
+                                  mb="xs"
+                                  className="leading-relaxed"
+                                >
+                                  {props.children}
+                                </Text>
+                              );
+                            },
+                            strong(props) {
+                              return (
+                                <Text component="span" fw={700}>
+                                  {props.children}
+                                </Text>
+                              );
+                            },
+                            ul(props) {
+                              return (
+                                <ul className="list-disc pl-5 mb-2 text-sm">
+                                  {props.children}
+                                </ul>
+                              );
+                            },
+                            ol(props) {
+                              return (
+                                <ol className="list-decimal pl-5 mb-2 text-sm">
+                                  {props.children}
+                                </ol>
+                              );
+                            },
+                            li(props) {
+                              return <li className="mb-1">{props.children}</li>;
+                            },
+                          }}
+                        >
+                          {aiInsight || ""}
+                        </ReactMarkdown>
+                      </div>
+                    )}
+                  </Stack>
+                </Collapse>
               </Stack>
             </Collapse>
           </Stack>

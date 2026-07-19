@@ -28,6 +28,7 @@ This document contains rules, guidelines, and context for AI coding agents opera
 
 ## 💻 Coding Standards & Workflow
 - **Follow Existing Patterns**: Always analyze existing code structure and formatting before writing new code. Maintain consistency.
+- **Mantine v7 Compatibility**: Pada komponen seperti `<Collapse>`, gunakan prop `expanded={...}` BUKAN `in={...}` untuk menghindari type error.
 - **Error to Skill**: Whenever making a mistake (hallucination, deprecated API usage, wrong assumptions), immediately document it as a new skill in `.agents/skills/<skill-name>/SKILL.md` to prevent future recurrence.
 - **Incremental Changes**: When making large architectural changes or refactoring, do it incrementally. Ensure the code is runnable and tests pass at each step.
 - **Clean Up**: Always clean up temporary files, logs, or scratchpads created during the reasoning or debugging process.

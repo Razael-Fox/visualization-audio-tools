@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Card, Group, Text, Button, Collapse, Stack, Loader, ThemeIcon, Badge } from "@mantine/core";
-import { Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -23,12 +22,10 @@ export function AIInsightPanel({
   onGenerate,
   color = "blue"
 }: AIInsightPanelProps) {
-  const [opened, setOpened] = useState(true);
-
   return (
     <Card withBorder shadow="sm" radius="md" p="md" className="w-full mt-6 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/20 dark:to-purple-950/20 border-indigo-100 dark:border-indigo-900/50">
-      <Group justify="space-between" align="center" mb={opened || insightResult ? "md" : 0}>
-        <Group gap="sm" onClick={() => setOpened(!opened)} className="cursor-pointer">
+      <Group justify="space-between" align="center" mb={loading || insightResult ? "md" : 0}>
+        <Group gap="sm">
           <ThemeIcon variant="light" color={color} size="md" radius="xl">
             <Sparkles size={16} />
           </ThemeIcon>
@@ -49,13 +46,10 @@ export function AIInsightPanel({
           >
             {insightResult ? "Regenerate" : "Generate Insight"}
           </Button>
-          <Button variant="subtle" size="xs" color="gray" p={4} onClick={() => setOpened(!opened)}>
-            {opened ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </Button>
         </Group>
       </Group>
 
-      <Collapse expanded={opened}>
+      <Collapse expanded={loading || !!insightResult}>
         {loading && (
           <Group justify="center" py="xl">
             <Loader size="sm" color={color} type="dots" />
@@ -69,7 +63,7 @@ export function AIInsightPanel({
               remarkPlugins={[remarkGfm]}
               components={{
                 code(props) {
-                  const { children, className, node, ...rest } = props;
+                  const { children, className, node: _node, ...rest } = props;
                   const text = String(children);
                   const isTimestamp = /^\\d{1,2}:\\d{2}(?::\\d{2})?$/.test(text);
                   
