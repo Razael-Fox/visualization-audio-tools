@@ -7,6 +7,9 @@ import {
 import theme from "./theme";
 import "./globals.css";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Outfit } from "next/font/google";
+
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
   title: {
@@ -42,7 +45,7 @@ export default function RootLayout({
       <head>
         <ColorSchemeScript />
       </head>
-      <body className="antialiased">
+      <body className={`antialiased ${outfit.variable} font-sans`}>
         <MantineProvider theme={theme}>
           <AppLayout>{children}</AppLayout>
         </MantineProvider>
