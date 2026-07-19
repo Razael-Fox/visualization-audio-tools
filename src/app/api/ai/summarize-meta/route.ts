@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { metadata, fileName, fileSize } = body;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
 You are an audio expert AI. Please analyze the following audio metadata and provide a short, engaging narrative summary (1-2 paragraphs).
