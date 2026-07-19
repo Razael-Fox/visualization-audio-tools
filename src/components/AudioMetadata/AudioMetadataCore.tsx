@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button, Card, Group, Stack, Text, FileButton, Grid, Badge, Image as MantineImage } from "@mantine/core";
 import { FileAudio, Upload } from "lucide-react";
 // @ts-ignore
-import jsmediatags from "jsmediatags";
+const jsmediatags = typeof window !== "undefined" ? require("jsmediatags/dist/jsmediatags.min.js") : null;
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
 
 interface AudioMetadata {
