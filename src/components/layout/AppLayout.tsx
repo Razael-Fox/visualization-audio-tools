@@ -15,6 +15,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Activity, FileAudio, Mic } from "lucide-react";
 import { ColorSchemesSwitcher } from "@/components/color-schemes-switcher";
+import { GitHubLoginButton } from "@/components/Auth/GitHubLoginButton";
 
 const links = [
   { link: "/", label: "Home", icon: Activity },
@@ -40,7 +41,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <AppShellHeader>
         <Group h="100%" px="md" justify="space-between">
           <Group>
-            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+            <Burger
+              opened={opened}
+              onClick={toggle}
+              hiddenFrom="sm"
+              size="sm"
+            />
             <Text
               component={Link}
               href="/"
@@ -49,15 +55,25 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               variant="gradient"
               gradient={{ from: "blue", to: "cyan", deg: 90 }}
             >
-              Visualization Audio Tools
+              VANT
             </Text>
           </Group>
-          <ColorSchemesSwitcher />
+          <Group>
+            <GitHubLoginButton />
+            <ColorSchemesSwitcher />
+          </Group>
         </Group>
       </AppShellHeader>
 
       <AppShellNavbar p="md">
-        <Group flex={1} style={{ flexDirection: "column", gap: "0.5rem", alignItems: "stretch" }}>
+        <Group
+          flex={1}
+          style={{
+            flexDirection: "column",
+            gap: "0.5rem",
+            alignItems: "stretch",
+          }}
+        >
           {links.map((item) => (
             <UnstyledButton
               component={Link}

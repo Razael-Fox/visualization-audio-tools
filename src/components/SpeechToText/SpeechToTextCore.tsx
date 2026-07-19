@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Card, Group, Stack, Text, FileButton, Textarea, ActionIcon, CopyButton, Tooltip } from "@mantine/core";
-import { Mic, Upload, Copy, Check, Download } from "lucide-react";
+import { Button, Card, Group, Stack, Text, FileButton, Textarea, ActionIcon, CopyButton, Tooltip, Alert } from "@mantine/core";
+import { Mic, Upload, Copy, Check, Download, AlertCircle } from "lucide-react";
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
+import { useUsageLimit } from "@/hooks/useUsageLimit";
 
 export function SpeechToTextCore() {
   const [file, setFile] = useState<File | null>(null);
@@ -13,9 +14,20 @@ export function SpeechToTextCore() {
 
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [limitError, setLimitError] = useState<string | null>(null);
+
+  const { canUpload, canGenerateAi, incrementUpload, incrementAi, checkDuration } = useUsageLimit();
 
   const handleGenerateInsight = async () => {
     if (!transcription) return;
+    setLimitError(null);
+    
+    if (!canGenerateAi) {
+      setLimitError("You have reached the AI generation limit for this session.");
+      return;
+    }
+    
+    await incrementAi();
     
     setAiLoading(true);
     try {
@@ -35,8 +47,23 @@ export function SpeechToTextCore() {
     }
   };
 
-  const handleFileUpload = (selectedFile: File | null) => {
+  const handleFileUpload = async (selectedFile: File | null) => {
     if (!selectedFile) return;
+    setLimitError(null);
+    
+    if (!canUpload) {
+      setLimitError("You have reached the maximum upload limit for this session.");
+      return;
+    }
+    
+    const isValidDuration = await checkDuration(selectedFile);
+    if (!isValidDuration) {
+      setLimitError("Audio file exceeds the 10-minute duration limit.");
+      return;
+    }
+
+    await incrementUpload();
+
     setFile(selectedFile);
     setError(null);
     setTranscription("");
@@ -88,6 +115,11 @@ export function SpeechToTextCore() {
   return (
     <Card withBorder shadow="sm" radius="md" p="xl" className="w-full">
       <Stack gap="lg">
+        {limitError && (
+          <Alert icon={<AlertCircle size={16} />} title="Usage Limit Reached" color="red" variant="light" withCloseButton onClose={() => setLimitError(null)}>
+            {limitError} Please <a href="https://www.razael-fox.my.id/go/discord" target="_blank" rel="noreferrer" className="underline">Join our Discord</a> for more info.
+          </Alert>
+        )}
         <Group justify="space-between" align="center">
           <Group gap="sm">
             <Mic size={24} className="text-teal-500" />
@@ -95,7 +127,7 @@ export function SpeechToTextCore() {
           </Group>
           <FileButton onChange={handleFileUpload} accept="audio/*">
             {(props) => (
-              <Button {...props} leftSection={<Upload size={16} />} variant="light" color="teal">
+              <Button {...props} leftSection={<Upload size={16} />} variant="light" color="stt">
                 Select Audio
               </Button>
             )}
@@ -109,7 +141,7 @@ export function SpeechToTextCore() {
             </Text>
             <Button 
               size="sm" 
-              color="teal" 
+              color="stt" 
               onClick={handleTranscribe} 
               loading={loading}
             >
@@ -134,14 +166,14 @@ export function SpeechToTextCore() {
                   <CopyButton value={transcription} timeout={2000}>
                     {({ copied, copy }) => (
                       <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
-                        <ActionIcon color={copied ? 'teal' : 'gray'} variant="subtle" onClick={copy}>
+                        <ActionIcon color={copied ? 'stt' : 'gray'} variant="subtle" onClick={copy}>
                           {copied ? <Check size={16} /> : <Copy size={16} />}
                         </ActionIcon>
                       </Tooltip>
                     )}
                   </CopyButton>
                   <Tooltip label="Download as .txt" withArrow>
-                    <ActionIcon color="teal" variant="subtle" onClick={handleDownload}>
+                    <ActionIcon color="stt" variant="subtle" onClick={handleDownload}>
                       <Download size={16} />
                     </ActionIcon>
                   </Tooltip>
@@ -167,7 +199,7 @@ export function SpeechToTextCore() {
                 insightResult={aiInsight}
                 loading={aiLoading}
                 onGenerate={handleGenerateInsight}
-                color="teal"
+                color="stt"
               />
             )}
           </Stack>

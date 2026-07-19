@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
-import { Button, Card, Group, Stack, Text, FileButton, ActionIcon, Slider } from "@mantine/core";
-import { Play, Pause, Square, Upload, Sparkles } from "lucide-react";
+import { Button, Card, Group, Stack, Text, FileButton, ActionIcon, Slider, Alert } from "@mantine/core";
+import { Play, Pause, Square, Upload, Sparkles, AlertCircle } from "lucide-react";
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
+import { useUsageLimit } from "@/hooks/useUsageLimit";
 
 export function AudioVisualizerCore() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -17,9 +18,20 @@ export function AudioVisualizerCore() {
 
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [limitError, setLimitError] = useState<string | null>(null);
+  
+  const { canUpload, canGenerateAi, incrementUpload, incrementAi, checkDuration } = useUsageLimit();
 
   const handleGenerateInsight = async () => {
     if (!file) return;
+    setLimitError(null);
+    
+    if (!canGenerateAi) {
+      setLimitError("You have reached the AI generation limit for this session.");
+      return;
+    }
+    
+    await incrementAi();
     
     setAiLoading(true);
     const formData = new FormData();
@@ -65,8 +77,23 @@ export function AudioVisualizerCore() {
     };
   }, []);
 
-  const handleFileUpload = (selectedFile: File | null) => {
+  const handleFileUpload = async (selectedFile: File | null) => {
     if (!selectedFile || !wavesurfer.current) return;
+    setLimitError(null);
+    
+    if (!canUpload) {
+      setLimitError("You have reached the maximum upload limit for this session.");
+      return;
+    }
+    
+    const isValidDuration = await checkDuration(selectedFile);
+    if (!isValidDuration) {
+      setLimitError("Audio file exceeds the 10-minute duration limit.");
+      return;
+    }
+
+    await incrementUpload();
+
     setFile(selectedFile);
     setAudioFileName(selectedFile.name);
     setAiInsight(null);
@@ -92,6 +119,11 @@ export function AudioVisualizerCore() {
   return (
     <Card withBorder shadow="sm" radius="md" p="xl" className="w-full">
       <Stack gap="lg">
+        {limitError && (
+          <Alert icon={<AlertCircle size={16} />} title="Usage Limit Reached" color="red" variant="light" withCloseButton onClose={() => setLimitError(null)}>
+            {limitError} Please <a href="https://www.razael-fox.my.id/go/discord" target="_blank" rel="noreferrer" className="underline">Join our Discord</a> for more info.
+          </Alert>
+        )}
         <Group justify="space-between" align="center">
           <Text fw={600} size="lg">Audio Waveform</Text>
           <FileButton onChange={handleFileUpload} accept="audio/*">
@@ -119,7 +151,7 @@ export function AudioVisualizerCore() {
             <ActionIcon 
               size="xl" 
               variant="filled" 
-              color="blue" 
+              color="visualizer" 
               onClick={togglePlay}
               disabled={!audioFileName}
             >
@@ -156,7 +188,7 @@ export function AudioVisualizerCore() {
             insightResult={aiInsight}
             loading={aiLoading}
             onGenerate={handleGenerateInsight}
-            color="violet"
+            color="visualizer"
           />
         )}
       </Stack>

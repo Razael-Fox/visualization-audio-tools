@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Card, Group, Stack, Text, FileButton, Grid, Badge, Image as MantineImage } from "@mantine/core";
-import { FileAudio, Upload } from "lucide-react";
+import { Button, Card, Group, Stack, Text, FileButton, Grid, Badge, Image as MantineImage, Alert } from "@mantine/core";
+import { FileAudio, Upload, AlertCircle } from "lucide-react";
 // @ts-ignore
 const jsmediatags = typeof window !== "undefined" ? require("jsmediatags/dist/jsmediatags.min.js") : null;
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
+import { useUsageLimit } from "@/hooks/useUsageLimit";
 
 interface AudioMetadata {
   title?: string;
@@ -28,9 +29,20 @@ export function AudioMetadataCore() {
 
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [limitError, setLimitError] = useState<string | null>(null);
+  
+  const { canUpload, canGenerateAi, incrementUpload, incrementAi, checkDuration } = useUsageLimit();
 
   const handleGenerateInsight = async () => {
     if (!metadata) return;
+    setLimitError(null);
+    
+    if (!canGenerateAi) {
+      setLimitError("You have reached the AI generation limit for this session.");
+      return;
+    }
+    
+    await incrementAi();
     
     setAiLoading(true);
     try {
@@ -58,8 +70,22 @@ export function AudioMetadataCore() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const handleFileUpload = (file: File | null) => {
+  const handleFileUpload = async (file: File | null) => {
     if (!file) return;
+    setLimitError(null);
+    
+    if (!canUpload) {
+      setLimitError("You have reached the maximum upload limit for this session.");
+      return;
+    }
+    
+    const isValidDuration = await checkDuration(file);
+    if (!isValidDuration) {
+      setLimitError("Audio file exceeds the 10-minute duration limit.");
+      return;
+    }
+
+    await incrementUpload();
     
     setFileName(file.name);
     setFileSize(formatSize(file.size));
@@ -91,6 +117,11 @@ export function AudioMetadataCore() {
   return (
     <Card withBorder shadow="sm" radius="md" p="xl" className="w-full">
       <Stack gap="lg">
+        {limitError && (
+          <Alert icon={<AlertCircle size={16} />} title="Usage Limit Reached" color="red" variant="light" withCloseButton onClose={() => setLimitError(null)}>
+            {limitError} Please <a href="https://www.razael-fox.my.id/go/discord" target="_blank" rel="noreferrer" className="underline">Join our Discord</a> for more info.
+          </Alert>
+        )}
         <Group justify="space-between" align="center">
           <Group gap="sm">
             <FileAudio size={24} className="text-orange-500" />
@@ -98,7 +129,7 @@ export function AudioMetadataCore() {
           </Group>
           <FileButton onChange={handleFileUpload} accept="audio/*">
             {(props) => (
-              <Button {...props} leftSection={<Upload size={16} />} variant="light" color="orange" loading={loading}>
+              <Button {...props} leftSection={<Upload size={16} />} variant="light" color="metadata" loading={loading}>
                 Select Audio File
               </Button>
             )}
@@ -172,7 +203,7 @@ export function AudioMetadataCore() {
                     
                     <Grid.Col span={4}><Text size="sm" c="dimmed">Genre:</Text></Grid.Col>
                     <Grid.Col span={8}>
-                      {metadata.genre ? <Badge color="orange" variant="light">{metadata.genre}</Badge> : "—"}
+                      {metadata.genre ? <Badge color="metadata" variant="light">{metadata.genre}</Badge> : "—"}
                     </Grid.Col>
                   </Grid>
                 </Stack>
@@ -185,7 +216,7 @@ export function AudioMetadataCore() {
               insightResult={aiInsight}
               loading={aiLoading}
               onGenerate={handleGenerateInsight}
-              color="orange"
+              color="metadata"
             />
           </>
         )}
