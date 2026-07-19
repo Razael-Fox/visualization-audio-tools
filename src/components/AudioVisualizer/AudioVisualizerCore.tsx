@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
-import { Button, Card, Group, Stack, Text, FileButton, ActionIcon, Slider, Alert } from "@mantine/core";
-import { Play, Pause, Square, Upload, Sparkles, AlertCircle } from "lucide-react";
+import { Button, Card, Group, Stack, Text, FileButton, ActionIcon, Slider, Alert, Collapse, Skeleton } from "@mantine/core";
+import { Play, Pause, Square, Upload, Sparkles, AlertCircle, Activity } from "lucide-react";
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
 import { useUsageLimit } from "@/hooks/useUsageLimit";
 
@@ -19,6 +19,7 @@ export function AudioVisualizerCore() {
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [limitError, setLimitError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
   
   const { canUpload, canGenerateAi, incrementUpload, incrementAi, checkDuration } = useUsageLimit();
 
@@ -58,9 +59,9 @@ export function AudioVisualizerCore() {
 
     wavesurfer.current = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: "violet",
-      progressColor: "purple",
-      cursorColor: "navy",
+      waveColor: "#4a90e2",
+      progressColor: "#1c7ed6",
+      cursorColor: "#1c7ed6",
       barWidth: 2,
       barGap: 1,
       barRadius: 2,
@@ -68,7 +69,8 @@ export function AudioVisualizerCore() {
       normalize: true,
     });
 
-    wavesurfer.current.on("play", () => setIsPlaying(true));
+    wavesurfer.current.on("ready", () => setIsReady(true));
+    wavesurfer.current.on("finish", () => setIsPlaying(false));
     wavesurfer.current.on("pause", () => setIsPlaying(false));
     wavesurfer.current.on("finish", () => setIsPlaying(false));
 
@@ -97,6 +99,7 @@ export function AudioVisualizerCore() {
     setFile(selectedFile);
     setAudioFileName(selectedFile.name);
     setAiInsight(null);
+    setIsReady(false);
     
     const url = URL.createObjectURL(selectedFile);
     wavesurfer.current.load(url);
@@ -124,27 +127,38 @@ export function AudioVisualizerCore() {
             {limitError} Please <a href="https://www.razael-fox.my.id/go/discord" target="_blank" rel="noreferrer" className="underline">Join our Discord</a> for more info.
           </Alert>
         )}
-        <Group justify="space-between" align="center">
-          <Text fw={600} size="lg">Audio Waveform</Text>
+        <Group justify="space-between" align="flex-start">
+          <Group gap="sm" align="center">
+            <Activity size={28} className="text-blue-500" />
+            <div>
+              <Text fw={700} size="xl">Audio Visualizer</Text>
+              <Text size="sm" c="dimmed">Visualize audio frequencies in real-time</Text>
+            </div>
+          </Group>
           <FileButton onChange={handleFileUpload} accept="audio/*">
             {(props) => (
-              <Button {...props} leftSection={<Upload size={16} />} variant="light">
+              <Button {...props} leftSection={<Upload size={16} />} variant="light" color="visualizer">
                 Upload Audio
               </Button>
             )}
           </FileButton>
         </Group>
 
-        {audioFileName && (
-          <Text size="sm" c="dimmed">
-            Loaded: <span className="font-medium text-gray-700 dark:text-gray-300">{audioFileName}</span>
-          </Text>
-        )}
+        <Collapse in={!!audioFileName}>
+          <Stack gap="md" mt="md">
+            <Text size="sm" c="dimmed">
+              Loaded: <span className="font-medium text-gray-700 dark:text-gray-300">{audioFileName}</span>
+            </Text>
 
-        <div 
-          ref={containerRef} 
-          className="w-full bg-gray-50 dark:bg-dark-700 rounded-md border border-gray-200 dark:border-dark-500 min-h-[150px]"
-        />
+            <div className="relative">
+              {!isReady && (
+                <Skeleton height={150} radius="md" animate />
+              )}
+              <div 
+                ref={containerRef} 
+                className={`w-full bg-gray-50 dark:bg-dark-700 rounded-md border border-gray-200 dark:border-dark-500 min-h-[150px] ${!isReady ? 'hidden' : ''}`}
+              />
+            </div>
 
         <Group justify="space-between">
           <Group gap="sm">
@@ -181,16 +195,16 @@ export function AudioVisualizerCore() {
           </Group>
         </Group>
 
-        {audioFileName && (
-          <AIInsightPanel 
-            title="Smart Waveform Insight" 
-            description="Let AI analyze the audio characteristics, structure, and quality."
-            insightResult={aiInsight}
-            loading={aiLoading}
-            onGenerate={handleGenerateInsight}
-            color="visualizer"
-          />
-        )}
+            <AIInsightPanel 
+              title="Acoustic Analysis Insights" 
+              description="Get AI-powered analysis of the audio characteristics, waveform patterns, and structural insights."
+              insightResult={aiInsight}
+              loading={aiLoading}
+              onGenerate={handleGenerateInsight}
+              color="visualizer"
+            />
+          </Stack>
+        </Collapse>
       </Stack>
     </Card>
   );
