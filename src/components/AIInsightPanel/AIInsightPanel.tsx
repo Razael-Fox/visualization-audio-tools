@@ -55,7 +55,7 @@ export function AIInsightPanel({
         </Group>
       </Group>
 
-      <Collapse in={opened}>
+      <Collapse expanded={opened}>
         {loading && (
           <Group justify="center" py="xl">
             <Loader size="sm" color={color} type="dots" />
