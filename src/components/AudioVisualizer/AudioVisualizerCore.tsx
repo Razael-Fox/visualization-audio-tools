@@ -9,7 +9,11 @@ import { useUsageLimit } from "@/hooks/useUsageLimit";
 
 export function AudioVisualizerCore() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const wavesurfer = useRef<WaveSurfer | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const requestRef = useRef<number>(0);
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -46,7 +50,7 @@ export function AudioVisualizerCore() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setAiInsight(data.insight);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setAiInsight("Failed to analyze audio using AI.");
     } finally {
@@ -69,15 +73,90 @@ export function AudioVisualizerCore() {
       normalize: true,
     });
 
-    wavesurfer.current.on("ready", () => setIsReady(true));
-    wavesurfer.current.on("finish", () => setIsPlaying(false));
-    wavesurfer.current.on("pause", () => setIsPlaying(false));
-    wavesurfer.current.on("finish", () => setIsPlaying(false));
+    wavesurfer.current.on("ready", () => {
+      setIsReady(true);
+      
+      if (!audioCtxRef.current) {
+        try {
+          // @ts-expect-error webkitAudioContext is Safari specific
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 256;
+          
+          const media = wavesurfer.current?.getMediaElement();
+          if (media) {
+            const source = audioCtx.createMediaElementSource(media);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            
+            audioCtxRef.current = audioCtx;
+            analyserRef.current = analyser;
+          }
+        } catch (e) {
+          console.error("Web Audio API error", e);
+        }
+      }
+    });
+
+    wavesurfer.current.on("play", () => {
+      setIsPlaying(true);
+      if (audioCtxRef.current?.state === "suspended") {
+        audioCtxRef.current.resume();
+      }
+      drawSpectrum();
+    });
+
+    wavesurfer.current.on("pause", () => {
+      setIsPlaying(false);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    });
+    
+    wavesurfer.current.on("finish", () => {
+      setIsPlaying(false);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    });
 
     return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
       wavesurfer.current?.destroy();
     };
   }, []);
+
+  const drawSpectrum = () => {
+    if (!analyserRef.current || !canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    const analyser = analyserRef.current;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    
+    const draw = () => {
+      requestRef.current = requestAnimationFrame(draw);
+      analyser.getByteFrequencyData(dataArray);
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let barHeight;
+      let x = 0;
+      
+      const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+      gradient.addColorStop(0, "#4a90e2");
+      gradient.addColorStop(1, "#ae4bec");
+      
+      for (let i = 0; i < bufferLength; i++) {
+        barHeight = dataArray[i] / 1.5;
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        x += barWidth + 1;
+      }
+    };
+    
+    draw();
+  };
 
   const handleFileUpload = async (selectedFile: File | null) => {
     if (!selectedFile || !wavesurfer.current) return;
@@ -144,19 +223,28 @@ export function AudioVisualizerCore() {
           </FileButton>
         </Group>
 
-        <Collapse expanded={!!audioFileName}>
+        <Collapse in={!!audioFileName}>
           <Stack gap="md" mt="md">
             <Text size="sm" c="dimmed">
               Loaded: <span className="font-medium text-gray-700 dark:text-gray-300">{audioFileName}</span>
             </Text>
 
-            <div className="relative">
+            <div className="relative w-full rounded-md border border-gray-200 dark:border-dark-500 overflow-hidden bg-gray-50 dark:bg-dark-700">
               {!isReady && (
                 <Skeleton height={150} radius="md" animate />
               )}
+              
+              <canvas 
+                ref={canvasRef}
+                width={800}
+                height={150}
+                className={`absolute inset-0 w-full h-full opacity-40 pointer-events-none transition-opacity duration-300 ${!isReady ? 'hidden' : ''}`}
+                style={{ zIndex: 0 }}
+              />
+
               <div 
                 ref={containerRef} 
-                className={`w-full bg-gray-50 dark:bg-dark-700 rounded-md border border-gray-200 dark:border-dark-500 min-h-[150px] ${!isReady ? 'hidden' : ''}`}
+                className={`w-full min-h-[150px] relative z-10 ${!isReady ? 'hidden' : ''}`}
               />
             </div>
 
