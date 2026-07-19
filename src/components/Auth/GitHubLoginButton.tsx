@@ -28,12 +28,33 @@ export function GitHubLoginButton() {
   const { user, isInitializing } = useUsageLimit();
 
   const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: window.location.origin,
-      },
-    });
+    // Check if running inside an iframe/webview
+    const isIframe = window.top !== window.self;
+
+    if (isIframe) {
+      const { data } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: 'https://www.razael-fox.my.id/vant',
+          skipBrowserRedirect: true,
+        },
+      });
+
+      if (data?.url) {
+        try {
+          window.top!.location.href = data.url;
+        } catch (e) {
+          window.open(data.url, '_blank');
+        }
+      }
+    } else {
+      await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+    }
   };
 
   const handleLogout = async () => {
