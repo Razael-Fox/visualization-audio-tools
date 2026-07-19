@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Button, Avatar, Menu } from '@mantine/core';
 import { LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -27,21 +28,54 @@ function GithubIcon({ size = 16 }: { size?: number }) {
 export function GitHubLoginButton() {
   const { user, isInitializing } = useUsageLimit();
 
+  useEffect(() => {
+    // Check if we are inside the popup window spawned for auth
+    if (window.opener && window.location.search.includes('popup=true')) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          window.opener.postMessage({
+            type: 'SUPABASE_AUTH_SUCCESS',
+            access_token: session.access_token,
+            refresh_token: session.refresh_token
+          }, '*');
+          window.close();
+        }
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data?.type === 'SUPABASE_AUTH_SUCCESS') {
+        const { access_token, refresh_token } = event.data;
+        if (access_token && refresh_token) {
+          await supabase.auth.setSession({ access_token, refresh_token });
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const handleLogin = async () => {
-    // Check if running inside an iframe/webview
     const isIframe = window.top !== window.self;
 
     if (isIframe) {
       const { data } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}?popup=true`,
           skipBrowserRedirect: true,
         },
       });
 
       if (data?.url) {
-        window.open(data.url, '_blank');
+        const width = 500;
+        const height = 600;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+        window.open(data.url, 'SupabaseAuthPopup', `width=${width},height=${height},left=${left},top=${top}`);
       }
     } else {
       await supabase.auth.signInWithOAuth({
