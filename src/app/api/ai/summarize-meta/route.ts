@@ -16,13 +16,13 @@ export async function POST(req: NextRequest) {
       model: "gemini-3.1-flash-lite",
       generationConfig: {
         maxOutputTokens: 300,
+        temperature: 0.5,
       }
     });
 
     const prompt = `
-You are an audio expert AI. Please analyze the following audio metadata and provide a short, engaging narrative summary (1-2 paragraphs).
-Highlight any missing tags (like album art, genre, year) and suggest improvements. 
-Also, estimate the audio quality if you can based on file size or available data.
+Analyze this audio metadata and provide a highly concise summary.
+DO NOT include any conversational filler or introductions (e.g., "Here is..."). Be direct and brief.
 
 Metadata:
 - File Name: ${fileName}
@@ -34,7 +34,7 @@ Metadata:
 - Genre: ${metadata.genre || 'Unknown'}
 - Has Cover Art: ${metadata.picture ? 'Yes' : 'No'}
 
-Keep your tone helpful, professional, but slightly casual. Provide actionable insights.
+Provide a 2-3 sentence analysis of the data and suggest missing tags if any. Output strictly text without chatbot introduction.
     `;
 
     const result = await model.generateContent(prompt);

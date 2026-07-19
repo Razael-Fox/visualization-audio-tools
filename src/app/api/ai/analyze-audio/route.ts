@@ -25,17 +25,18 @@ export async function POST(req: NextRequest) {
       model: "gemini-3.1-flash-lite",
       generationConfig: {
         maxOutputTokens: 400,
+        temperature: 0.5,
       }
     });
 
     const prompt = `
-You are an expert audio engineer and music analyst. I am providing you with an audio file.
-Please listen to it and provide a "Smart Waveform Insight" with the following:
-1. General Characteristics: Describe the mood, genre (if applicable), and overall feel.
-2. Structure: Break down the likely structure (e.g., Intro, Build-up, Chorus, Outro) with approximate timestamps if you can guess them.
-3. Audio Quality: Note any obvious issues like clipping, background noise, or distortion. Suggest improvements.
+Analyze this audio file and provide a highly concise summary.
+DO NOT include any conversational filler or chatbot introductions (e.g. "Certainly!", "Here is...").
+Output strictly in the following format using bullet points:
 
-Format the output clearly using bullet points and short paragraphs.
+**General:** [Genre/Mood/Feel]
+**Structure:** [Timestamps and sections]
+**Quality:** [Clarity and technical issues]
     `;
 
     const result = await model.generateContent([
