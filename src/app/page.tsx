@@ -10,7 +10,7 @@ export default function Home() {
       title: "Audio Visualizer",
       description: "Visualize audio waveform and frequency spectrum in real-time.",
       icon: Activity,
-      color: "blue",
+      color: "violet",
       href: "/visualizer"
     },
     {

@@ -13,21 +13,26 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, FileAudio, Mic } from "lucide-react";
+import { useEffect } from "react";
+import { Activity, FileAudio, Mic, Home } from "lucide-react";
 import { ColorSchemesSwitcher } from "@/components/color-schemes-switcher";
 import { GitHubLoginButton } from "@/components/Auth/GitHubLoginButton";
 import { SiteBanner } from "@/components/SiteBanner/SiteBanner";
 
 const links = [
-  { link: "/", label: "Home", icon: Activity },
-  { link: "/visualizer", label: "Audio Visualizer", icon: Activity },
-  { link: "/speech-to-text", label: "Speech to Text", icon: Mic },
-  { link: "/metadata", label: "Extract Metadata", icon: FileAudio },
+  { link: "/", label: "Home", icon: Home, color: "blue" },
+  { link: "/visualizer", label: "Audio Visualizer", icon: Activity, color: "violet" },
+  { link: "/speech-to-text", label: "Speech to Text", icon: Mic, color: "teal" },
+  { link: "/metadata", label: "Extract Metadata", icon: FileAudio, color: "orange" },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const [opened, { toggle }] = useDisclosure();
+  const [opened, { toggle, close }] = useDisclosure();
   const pathname = usePathname();
+
+  useEffect(() => {
+    close();
+  }, [pathname, close]);
 
   return (
     <AppShell
@@ -83,9 +88,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               data-active={item.link === pathname || undefined}
               className={`flex items-center gap-3 p-3 rounded-md transition-colors ${
                 item.link === pathname
-                  ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium"
+                  ? ""
                   : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
               }`}
+              style={
+                item.link === pathname
+                  ? {
+                      backgroundColor: `var(--mantine-color-${item.color}-light)`,
+                      color: `var(--mantine-color-${item.color}-light-color)`,
+                      fontWeight: 500,
+                    }
+                  : {}
+              }
             >
               <item.icon size={20} />
               <Text size="sm">{item.label}</Text>
