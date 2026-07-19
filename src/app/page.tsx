@@ -1,3 +1,5 @@
+"use client";
+
 import { Button, Card, Container, Grid, Group, Text, Title, ThemeIcon } from "@mantine/core";
 import Link from "next/link";
 import { Activity, FileAudio, Mic, Sparkles } from "lucide-react";
