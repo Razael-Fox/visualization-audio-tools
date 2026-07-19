@@ -16,6 +16,7 @@ import { usePathname } from "next/navigation";
 import { Activity, FileAudio, Mic } from "lucide-react";
 import { ColorSchemesSwitcher } from "@/components/color-schemes-switcher";
 import { GitHubLoginButton } from "@/components/Auth/GitHubLoginButton";
+import { SiteBanner } from "@/components/SiteBanner/SiteBanner";
 
 const links = [
   { link: "/", label: "Home", icon: Activity },
@@ -93,7 +94,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </Group>
       </AppShellNavbar>
 
-      <AppShellMain>{children}</AppShellMain>
+      <AppShellMain>
+        <SiteBanner />
+        {children}
+      </AppShellMain>
     </AppShell>
   );
 }
