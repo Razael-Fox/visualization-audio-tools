@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
-import { Button, Card, Group, Stack, Text, FileButton, ActionIcon, Slider, Alert, Collapse, Skeleton } from "@mantine/core";
+import { Button, Card, Group, Stack, Text, FileButton, ActionIcon, Slider, Alert, Collapse, Skeleton, useMantineTheme, useComputedColorScheme } from "@mantine/core";
 import { Play, Pause, Square, Upload, Sparkles, AlertCircle, Activity } from "lucide-react";
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
 import { useUsageLimit } from "@/hooks/useUsageLimit";
@@ -15,7 +15,15 @@ export function AudioVisualizerCore() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const requestRef = useRef<number>(0);
   
+  const theme = useMantineTheme();
+  const colorScheme = useComputedColorScheme("dark");
+  const waveColor = colorScheme === "dark" ? theme.colors.violet[8] : theme.colors.violet[2];
+  const progressColor = colorScheme === "dark" ? theme.colors.violet[4] : theme.colors.violet[6];
+  const cursorColor = colorScheme === "dark" ? theme.colors.violet[2] : theme.colors.violet[8];
+
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [audioFileName, setAudioFileName] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -58,14 +66,30 @@ export function AudioVisualizerCore() {
     }
   };
 
+  const formatTime = (time: number) => {
+    const min = Math.floor(time / 60);
+    const sec = Math.floor(time % 60);
+    return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+  };
+
+  useEffect(() => {
+    if (wavesurfer.current) {
+      wavesurfer.current.setOptions({
+        waveColor,
+        progressColor,
+        cursorColor,
+      });
+    }
+  }, [waveColor, progressColor, cursorColor]);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
     wavesurfer.current = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: "#4a90e2",
-      progressColor: "#1c7ed6",
-      cursorColor: "#1c7ed6",
+      waveColor,
+      progressColor,
+      cursorColor,
       barWidth: 2,
       barGap: 1,
       barRadius: 2,
@@ -75,6 +99,7 @@ export function AudioVisualizerCore() {
 
     wavesurfer.current.on("ready", () => {
       setIsReady(true);
+      setDuration(wavesurfer.current?.getDuration() || 0);
       
       if (!audioCtxRef.current) {
         try {
@@ -114,6 +139,10 @@ export function AudioVisualizerCore() {
     wavesurfer.current.on("finish", () => {
       setIsPlaying(false);
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    });
+
+    wavesurfer.current.on("timeupdate", (time) => {
+      setCurrentTime(time);
     });
 
     return () => {
@@ -179,6 +208,8 @@ export function AudioVisualizerCore() {
     setAudioFileName(selectedFile.name);
     setAiInsight(null);
     setIsReady(false);
+    setCurrentTime(0);
+    setDuration(0);
     
     const url = URL.createObjectURL(selectedFile);
     wavesurfer.current.load(url);
@@ -247,8 +278,15 @@ export function AudioVisualizerCore() {
                 className={`w-full min-h-[150px] relative z-10 ${!isReady ? 'hidden' : ''}`}
               />
             </div>
+            
+            {isReady && (
+              <Group justify="space-between" mt="-xs">
+                <Text size="xs" c="dimmed" fw={500}>{formatTime(currentTime)}</Text>
+                <Text size="xs" c="dimmed" fw={500}>{formatTime(duration)}</Text>
+              </Group>
+            )}
 
-        <Group justify="space-between">
+        <Group justify="space-between" mt="sm">
           <Group gap="sm">
             <ActionIcon 
               size="xl" 
