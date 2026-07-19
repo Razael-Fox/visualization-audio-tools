@@ -33,11 +33,10 @@ export default function Home() {
     <Container size="lg" py="xl">
       <div className="flex flex-col items-center text-center max-w-[800px] mx-auto py-16">
         <Title order={1} className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
-          Next-Gen <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">Audio Tools</span>
+          VANT - <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">Visualization Audio And Tools</span>
         </Title>
         <Text c="dimmed" size="xl" className="mb-10 max-w-[600px]">
-          Powerful, AI-enhanced audio utilities running directly in your browser.
-          Visualize, transcribe, and analyze your audio files with ease.
+          A tool for visualizing audio, along with other useful tools designed for audio, featuring AI-powered functionality to assist with
         </Text>
         <Group justify="center">
           <Button component={Link} href="/visualizer" size="lg" radius="md" rightSection={<Activity size={18} />}>
