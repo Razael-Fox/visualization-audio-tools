@@ -21,7 +21,12 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
     const base64Audio = buffer.toString("base64");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-3.1-flash-lite",
+      generationConfig: {
+        maxOutputTokens: 400,
+      }
+    });
 
     const prompt = `
 You are an expert audio engineer and music analyst. I am providing you with an audio file.
