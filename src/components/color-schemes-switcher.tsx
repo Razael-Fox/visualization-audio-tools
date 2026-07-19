@@ -1,16 +1,20 @@
 "use client";
 
-import { useMantineColorScheme, Button, Group } from "@mantine/core";
+import { useMantineColorScheme, ActionIcon } from "@mantine/core";
+import { Sun, Moon } from "lucide-react";
 
 export function ColorSchemesSwitcher() {
-  const { setColorScheme, clearColorScheme } = useMantineColorScheme();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   return (
-    <Group>
-      <Button onClick={() => setColorScheme("light")}>Light</Button>
-      <Button onClick={() => setColorScheme("dark")}>Dark</Button>
-      <Button onClick={() => setColorScheme("auto")}>Auto</Button>
-      <Button onClick={clearColorScheme}>Clear</Button>
-    </Group>
+    <ActionIcon 
+      variant="default" 
+      onClick={toggleColorScheme} 
+      size="lg" 
+      aria-label="Toggle color scheme"
+    >
+      <Sun size={18} className="hidden dark:block" />
+      <Moon size={18} className="block dark:hidden" />
+    </ActionIcon>
   );
 }
