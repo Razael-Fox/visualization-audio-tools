@@ -2,7 +2,7 @@
 
 import { Button, Card, Container, Grid, Group, Text, Title, ThemeIcon } from "@mantine/core";
 import Link from "next/link";
-import { Activity, FileAudio, Mic, Sparkles } from "lucide-react";
+import { Activity, FileAudio, Mic } from "lucide-react";
 
 export default function Home() {
   const features = [
@@ -30,13 +30,13 @@ export default function Home() {
   ];
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="lg" py="xl" component="main">
       <div className="flex flex-col items-center text-center max-w-[800px] mx-auto py-16">
         <Title order={1} className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
           VANT - <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">Visualization Audio And Tools</span>
         </Title>
         <Text c="dimmed" size="xl" className="mb-10 max-w-[600px]">
-          A tool for visualizing audio, along with other useful tools designed for audio, featuring AI-powered functionality to assist with
+          A comprehensive suite of web-based audio tools. Visualize waveforms, transcribe speech to text, and extract ID3 metadata effortlessly with AI-powered insights.
         </Text>
         <Group justify="center">
           <Button component={Link} href="/visualizer" size="lg" radius="md" rightSection={<Activity size={18} />}>
@@ -55,9 +55,9 @@ export default function Home() {
               <ThemeIcon size={50} radius="md" color={feature.color} variant="light" className="mb-4">
                 <feature.icon size={26} />
               </ThemeIcon>
-              <Text fw={600} size="lg" mb="sm">
+              <Title order={2} size="h4" fw={600} mb="sm">
                 {feature.title}
-              </Text>
+              </Title>
               <Text size="sm" c="dimmed" className="flex-1">
                 {feature.description}
               </Text>
