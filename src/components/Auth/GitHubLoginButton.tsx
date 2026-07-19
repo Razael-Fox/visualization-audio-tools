@@ -35,17 +35,13 @@ export function GitHubLoginButton() {
       const { data } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: 'https://www.razael-fox.my.id/vant',
+          redirectTo: window.location.origin,
           skipBrowserRedirect: true,
         },
       });
 
       if (data?.url) {
-        try {
-          window.top!.location.href = data.url;
-        } catch (e) {
-          window.open(data.url, '_blank');
-        }
+        window.open(data.url, '_blank');
       }
     } else {
       await supabase.auth.signInWithOAuth({
