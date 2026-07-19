@@ -1,65 +1,75 @@
-import { ColorSchemesSwitcher } from "@/components/color-schemes-switcher";
-import {
-  AppShell,
-  AppShellHeader,
-  AppShellMain,
-  Group,
-  Text,
-  Title,
-} from "@mantine/core";
-import Image from "next/image";
+import { Button, Card, Container, Grid, Group, Text, Title, ThemeIcon } from "@mantine/core";
+import Link from "next/link";
+import { Activity, FileAudio, Mic, Sparkles } from "lucide-react";
 
 export default function Home() {
-  return (
-    <AppShell header={{ height: 60 }} padding="md">
-      <AppShellHeader>
-        <Group className="h-full px-md">
-          <Image
-            className="dark:invert"
-            src="https://nextjs.org/icons/next.svg"
-            alt="logo"
-            width={100}
-            height={100}
-          />
-        </Group>
-      </AppShellHeader>
-      <AppShellMain>
-        <Title className="text-center mt-20">
-          Welcome to{" "}
-          <Text
-            inherit
-            variant="gradient"
-            component="span"
-            gradient={{ from: "pink", to: "yellow" }}
-          >
-            Mantine
-          </Text>{" "}
-          +
-          <Text
-            inherit
-            variant="gradient"
-            component="span"
-            gradient={{ from: "blue", to: "green" }}
-          >
-            TailwindCSS
-          </Text>
-        </Title>
-        <Text
-          className="text-center text-gray-700 dark:text-gray-300 max-w-[500px] mx-auto mt-xl"
-          ta="center"
-          size="lg"
-          maw={580}
-          mx="auto"
-          mt="xl"
-        >
-          This starter Next.js project includes a minimal setup for Mantine with
-          TailwindCSS. To get started edit page.tsx file.
-        </Text>
+  const features = [
+    {
+      title: "Audio Visualizer",
+      description: "Visualize audio waveform and frequency spectrum in real-time.",
+      icon: Activity,
+      color: "blue",
+      href: "/visualizer"
+    },
+    {
+      title: "Speech-to-Text",
+      description: "Convert audio and voice to text efficiently with high accuracy.",
+      icon: Mic,
+      color: "teal",
+      href: "/speech-to-text"
+    },
+    {
+      title: "Extract Metadata",
+      description: "Parse and view ID3 tags and technical details from your audio files.",
+      icon: FileAudio,
+      color: "orange",
+      href: "/metadata"
+    }
+  ];
 
-        <div className="flex justify-center mt-10">
-          <ColorSchemesSwitcher />
-        </div>
-      </AppShellMain>
-    </AppShell>
+  return (
+    <Container size="lg" py="xl">
+      <div className="flex flex-col items-center text-center max-w-[800px] mx-auto py-16">
+        <Title order={1} className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
+          Next-Gen <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">Audio Tools</span>
+        </Title>
+        <Text c="dimmed" size="xl" className="mb-10 max-w-[600px]">
+          Powerful, AI-enhanced audio utilities running directly in your browser.
+          Visualize, transcribe, and analyze your audio files with ease.
+        </Text>
+        <Group justify="center">
+          <Button component={Link} href="/visualizer" size="lg" radius="md" rightSection={<Activity size={18} />}>
+            Try Visualizer
+          </Button>
+          <Button component={Link} href="/speech-to-text" variant="light" size="lg" radius="md" rightSection={<Mic size={18} />}>
+            Transcribe Audio
+          </Button>
+        </Group>
+      </div>
+
+      <Grid gutter="xl" mt={50}>
+        {features.map((feature) => (
+          <Grid.Col key={feature.title} span={{ base: 12, md: 4 }}>
+            <Card shadow="sm" padding="xl" radius="md" withBorder className="h-full flex flex-col hover:-translate-y-1 transition-transform duration-200">
+              <ThemeIcon size={50} radius="md" color={feature.color} variant="light" className="mb-4">
+                <feature.icon size={26} />
+              </ThemeIcon>
+              <Text fw={600} size="lg" mb="sm">
+                {feature.title}
+              </Text>
+              <Text size="sm" c="dimmed" className="flex-1">
+                {feature.description}
+              </Text>
+              
+              <Group mt="xl">
+                <Button component={Link} href={feature.href} variant="subtle" color={feature.color} px={0}>
+                  Open Tool →
+                </Button>
+              </Group>
+            </Card>
+          </Grid.Col>
+        ))}
+      </Grid>
+    </Container>
   );
 }
