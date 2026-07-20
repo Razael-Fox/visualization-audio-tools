@@ -975,19 +975,17 @@ export function LyricsEmbedderCore() {
                                 }`}
                               >
                                 <div className="flex items-center gap-2 overflow-hidden mr-4">
-                                  <Badge
-                                    size="xs"
-                                    circle
-                                    color={
+                                  <div
+                                    className={`flex items-center justify-center rounded-full text-[10px] font-bold shrink-0 w-5 h-5 ${
                                       isCurrent
-                                        ? "pink"
+                                        ? "bg-pink-500 text-white"
                                         : hasTime
-                                          ? "gray"
-                                          : "dark"
-                                    }
+                                          ? "bg-gray-200 dark:bg-dark-500 text-gray-600 dark:text-gray-300"
+                                          : "bg-gray-100 dark:bg-dark-700 text-gray-400"
+                                    }`}
                                   >
                                     {idx + 1}
-                                  </Badge>
+                                  </div>
                                   <Text
                                     size="sm"
                                     lineClamp={1}
