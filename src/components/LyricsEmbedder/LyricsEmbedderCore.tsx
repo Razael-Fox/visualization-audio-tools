@@ -914,7 +914,7 @@ export function LyricsEmbedderCore() {
                   >
                     <Stack gap="md" align="center" py="xl">
                       {syncedLyrics.length === 0 ? (
-                        <Text c="dimmed" italic>
+                        <Text c="dimmed" fs="italic">
                           No synchronized lyrics found.
                         </Text>
                       ) : (
