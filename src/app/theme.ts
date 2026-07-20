@@ -4,17 +4,40 @@ import {
   createTheme,
   defaultVariantColorsResolver,
   VariantColorsResolver,
+  parseThemeColor,
+  rgba,
 } from "@mantine/core";
 
 const variantColorResolver: VariantColorsResolver = (input) => {
   const defaultResolvedColors = defaultVariantColorsResolver(input);
 
   if (input.variant === "light") {
-    return {
-      ...defaultResolvedColors,
-      background: `color-mix(in srgb, ${defaultResolvedColors.color} 20%, transparent)`,
-      hover: `color-mix(in srgb, ${defaultResolvedColors.color} 30%, transparent)`,
-    };
+    const parsed = parseThemeColor({
+      color: input.color || input.theme.primaryColor,
+      theme: input.theme,
+    });
+
+    if (parsed.isThemeColor) {
+      const colors = input.theme.colors[parsed.color];
+      // Light mode uses shade 1, dark mode uses shade 6 with 25% opacity
+      const lightBg = colors[1];
+      const lightHover = colors[2];
+      const darkBg = rgba(colors[6], 0.25);
+      const darkHover = rgba(colors[6], 0.35);
+
+      return {
+        ...defaultResolvedColors,
+        background: `light-dark(${lightBg}, ${darkBg})`,
+        hover: `light-dark(${lightHover}, ${darkHover})`,
+      };
+    } else {
+      // Fallback for custom hex colors
+      return {
+        ...defaultResolvedColors,
+        background: `light-dark(${rgba(parsed.color, 0.1)}, ${rgba(parsed.color, 0.25)})`,
+        hover: `light-dark(${rgba(parsed.color, 0.15)}, ${rgba(parsed.color, 0.35)})`,
+      };
+    }
   }
 
   return defaultResolvedColors;

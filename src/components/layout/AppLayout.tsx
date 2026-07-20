@@ -11,6 +11,8 @@ import {
   UnstyledButton,
   Box,
   Portal,
+  useMantineTheme,
+  rgba,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
@@ -46,6 +48,7 @@ const links = [
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [opened, { toggle, close }] = useDisclosure();
   const pathname = usePathname();
+  const theme = useMantineTheme();
 
   useEffect(() => {
     close();
@@ -107,7 +110,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 style={
                   item.link === pathname
                     ? {
-                        backgroundColor: `color-mix(in srgb, var(--mantine-color-${item.color}-light-color) 20%, transparent)`,
+                        backgroundColor: `light-dark(var(--mantine-color-${item.color}-1), ${rgba(theme.colors[item.color]?.[6] || "#000", 0.25)})`,
                         color: `var(--mantine-color-${item.color}-light-color)`,
                         fontWeight: 500,
                       }
