@@ -127,7 +127,7 @@ export function SpeechToTextCore() {
       setTranscription(data.text);
     } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "An error occurred during transcription");
+      setError(err instanceof Error ? err.message : "An error occurred during transcription");
     } finally {
       setLoading(false);
     }
