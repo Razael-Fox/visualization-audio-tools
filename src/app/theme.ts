@@ -15,7 +15,8 @@ const theme = createTheme({
     metadata: ["#fff1e2","#ffe3cd","#fec59c","#fc9e5b","#fb8a3b","#fa791e","#fb700e","#df5f01","#c85300","#ae4500"],
   },
   primaryColor: "brand",
-  fontFamily: "var(--font-outfit), sans-serif",
+  fontFamily: "var(--font-plus-jakarta), sans-serif",
+  fontFamilyMonospace: "var(--font-jetbrains-mono), monospace",
   headings: {
     fontFamily: "var(--font-outfit), sans-serif",
   },

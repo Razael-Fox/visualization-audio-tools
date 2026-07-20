@@ -7,9 +7,11 @@ import {
 import theme from "./theme";
 import "./globals.css";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Outfit } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
+const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-plus-jakarta" });
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono" });
 
 export const metadata: Metadata = {
   title: {
@@ -45,7 +47,7 @@ export default function RootLayout({
       <head>
         <ColorSchemeScript />
       </head>
-      <body className={`antialiased ${outfit.variable} font-sans`}>
+      <body className={`antialiased ${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} font-sans`}>
         <MantineProvider theme={theme}>
           <AppLayout>{children}</AppLayout>
         </MantineProvider>
