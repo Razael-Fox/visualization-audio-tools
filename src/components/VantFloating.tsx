@@ -1,8 +1,4 @@
-interface VantFloatingProps {
-  navMenuVisible?: boolean;
-}
-
-export function VantFloating({ navMenuVisible }: VantFloatingProps) {
+export function VantFloating() {
   return (
     <div 
       style={{

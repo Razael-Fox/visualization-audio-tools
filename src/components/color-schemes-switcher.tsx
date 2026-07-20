@@ -7,10 +7,10 @@ export function ColorSchemesSwitcher() {
   const { toggleColorScheme } = useMantineColorScheme();
 
   return (
-    <ActionIcon 
-      variant="default" 
-      onClick={toggleColorScheme} 
-      size="lg" 
+    <ActionIcon
+      variant="default"
+      onClick={toggleColorScheme}
+      size="lg"
       aria-label="Toggle color scheme"
     >
       <Sun size={18} className="hidden dark:block" />

@@ -6,18 +6,21 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 export async function POST(req: NextRequest) {
   try {
     if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Gemini API key not configured" },
+        { status: 500 },
+      );
     }
 
     const body = await req.json();
     const { transcription } = body;
 
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
       model: "gemini-3.1-flash-lite",
       generationConfig: {
         maxOutputTokens: 500,
         temperature: 0.5,
-      }
+      },
     });
 
     const prompt = `
@@ -40,7 +43,7 @@ Provide ONLY the corrected text and the summary section, nothing else.
     console.error("AI Insight error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to generate AI insight" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -54,15 +54,16 @@ src/
    - Layouting custom dan micro-styling (seperti gradients, flex-box helpers) menggunakan `Tailwind CSS`.
 4. **AI Panel Standard**:
    - Output AI selalu menggunakan komponen reusable `AIInsightPanel`.
-   - Menggunakan gaya UI *collapsible card* dengan icon "Sparkles" (Lucide) untuk menandakan fitur cerdas.
+   - Menggunakan gaya UI _collapsible card_ dengan icon "Sparkles" (Lucide) untuk menandakan fitur cerdas.
 
 ## State Management
 
 - Tidak ada global state management rumit (Zustand/Redux tidak digunakan) karena setiap tools bersifat independen.
 - Component state lokal (`useState`) dirasa cukup untuk menangani UI state, loading states, dan penyimpanan metadata/transkripsi sementara.
-- URL Routing ditangani murni oleh *Next.js App Router*.
+- URL Routing ditangani murni oleh _Next.js App Router_.
 
 ## Modul dan Library Inti
+
 - `wavesurfer.js`: Render Waveform real-time.
 - `jsmediatags`: Ekstrak ID3 tag metadata file MP3/WAV dari buffer browser.
 - `@google/generative-ai`: Interaksi dengan Gemini API.
@@ -70,6 +71,7 @@ src/
 - `lucide-react`: Seluruh ikon UI.
 
 ## Aturan untuk AI Agents Selanjutnya
+
 1. **Dilarang memindahkan komponen ke Server Component secara sembarangan**: Komponen fitur murni (Visualizer, STT) membutuhkan interaksi DOM atau browser APIs (`window`, `AudioContext`, `File`), sehingga **wajib** berupa `"use client"`.
 2. **Gunakan Mantine untuk struktur UI**: Hindari membuat tombol atau card manual dengan Tailwind jika komponen Mantine sudah menyediakannya. Gunakan Tailwind hanya untuk utility margin/padding/color yang tidak tertutup oleh props Mantine.
 3. **Pemisahan Logika AI**: Semua pemanggilan provider AI (Gemini/Groq) harus lewat `/api/*` untuk keamanan API Key. Dilarang hardcode API Key atau memanggil SDK AI di sisi client component.

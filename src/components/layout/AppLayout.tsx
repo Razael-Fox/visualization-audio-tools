@@ -56,7 +56,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <AppShell
         header={{ height: { base: 0, sm: 60 } }}
         navbar={{
-          width: 300,
+          width: { base: 240, sm: 300 },
           breakpoint: "sm",
           collapsed: { mobile: !opened },
         }}
@@ -83,13 +83,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </Group>
         </AppShellHeader>
 
-        <AppShellNavbar p="md" pt={{ base: 140, sm: "md" }}>
+        <AppShellNavbar p="md">
           <Group
             flex={1}
             style={{
               flexDirection: "column",
               gap: "0.25rem",
               alignItems: "stretch",
+              marginTop: "4.5rem", // Memberikan gap aman di bawah VANT logo (yang ada di top 1rem + height 38px)
             }}
           >
             {links.map((item) => (
@@ -126,7 +127,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </AppShellMain>
       </AppShell>
 
-      <VantFloating navMenuVisible={opened} />
+      <VantFloating />
 
       {/* Floating Buttons for Mobile */}
       <Portal>

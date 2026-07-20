@@ -25,23 +25,26 @@ export function SiteBanner() {
   if (!mounted || isDismissed) return null;
 
   return (
-    <Alert 
-      icon={<Info size={16} />} 
-      title="Heads up!" 
-      color="blue" 
-      variant="light" 
-      withCloseButton 
+    <Alert
+      icon={<Info size={16} />}
+      title="Heads up!"
+      color="blue"
+      variant="light"
+      withCloseButton
       onClose={handleDismiss}
       mb="md"
     >
       <Group justify="space-between" align="center">
-        <span>VANT is currently in early development. You might encounter some bugs or usage limits.</span>
-        <Button 
-          component="a" 
-          href="https://www.razael-fox.my.id/go/discord" 
-          target="_blank" 
-          rel="noreferrer" 
-          variant="light" 
+        <span>
+          VANT is currently in early development. You might encounter some bugs
+          or usage limits.
+        </span>
+        <Button
+          component="a"
+          href="https://www.razael-fox.my.id/go/discord"
+          target="_blank"
+          rel="noreferrer"
+          variant="light"
           size="xs"
         >
           Join our Discord

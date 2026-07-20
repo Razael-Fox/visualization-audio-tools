@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Avatar, Menu, useMantineColorScheme } from '@mantine/core';
-import { LogOut, Sun, Moon, User } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { useUsageLimit } from '@/hooks/useUsageLimit';
+import { useEffect, useState } from "react";
+import { Avatar, Menu, useMantineColorScheme } from "@mantine/core";
+import { LogOut, Sun, Moon, User } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useUsageLimit } from "@/hooks/useUsageLimit";
 
 function GithubIcon({ size = 16 }: { size?: number }) {
   return (
@@ -37,14 +37,19 @@ export function GitHubLoginButton() {
 
   useEffect(() => {
     // Check if we are inside the popup window spawned for auth
-    if (window.opener && window.location.search.includes('popup=true')) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          window.opener.postMessage({
-            type: 'SUPABASE_AUTH_SUCCESS',
-            access_token: session.access_token,
-            refresh_token: session.refresh_token
-          }, '*');
+    if (window.opener && window.location.search.includes("popup=true")) {
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          window.opener.postMessage(
+            {
+              type: "SUPABASE_AUTH_SUCCESS",
+              access_token: session.access_token,
+              refresh_token: session.refresh_token,
+            },
+            "*",
+          );
           window.close();
         }
       });
@@ -54,15 +59,15 @@ export function GitHubLoginButton() {
 
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
-      if (event.data?.type === 'SUPABASE_AUTH_SUCCESS') {
+      if (event.data?.type === "SUPABASE_AUTH_SUCCESS") {
         const { access_token, refresh_token } = event.data;
         if (access_token && refresh_token) {
           await supabase.auth.setSession({ access_token, refresh_token });
         }
       }
     };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, []);
 
   const handleLogin = async () => {
@@ -70,7 +75,7 @@ export function GitHubLoginButton() {
 
     if (isIframe) {
       const { data } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
+        provider: "github",
         options: {
           redirectTo: `${window.location.origin}?popup=true`,
           skipBrowserRedirect: true,
@@ -82,11 +87,15 @@ export function GitHubLoginButton() {
         const height = 600;
         const left = window.screenX + (window.outerWidth - width) / 2;
         const top = window.screenY + (window.outerHeight - height) / 2;
-        window.open(data.url, 'SupabaseAuthPopup', `width=${width},height=${height},left=${left},top=${top}`);
+        window.open(
+          data.url,
+          "SupabaseAuthPopup",
+          `width=${width},height=${height},left=${left},top=${top}`,
+        );
       }
     } else {
       await supabase.auth.signInWithOAuth({
-        provider: 'github',
+        provider: "github",
         options: {
           redirectTo: window.location.origin,
         },
@@ -102,15 +111,15 @@ export function GitHubLoginButton() {
     <Menu shadow="md" width={220} position="bottom-end">
       <Menu.Target>
         {isInitializing ? (
-           <Avatar radius="xl" style={{ cursor: 'pointer' }} />
+          <Avatar radius="xl" style={{ cursor: "pointer" }} />
         ) : user ? (
-          <Avatar 
-            src={user.user_metadata.avatar_url} 
-            radius="xl" 
-            style={{ cursor: 'pointer' }}
+          <Avatar
+            src={user.user_metadata.avatar_url}
+            radius="xl"
+            style={{ cursor: "pointer" }}
           />
         ) : (
-          <Avatar radius="xl" style={{ cursor: 'pointer' }}>
+          <Avatar radius="xl" style={{ cursor: "pointer" }}>
             <User size={20} />
           </Avatar>
         )}
@@ -119,12 +128,14 @@ export function GitHubLoginButton() {
       <Menu.Dropdown>
         {user ? (
           <>
-            <Menu.Label>Logged in as {user.user_metadata.user_name || user.email}</Menu.Label>
+            <Menu.Label>
+              Logged in as {user.user_metadata.user_name || user.email}
+            </Menu.Label>
             <Menu.Divider />
           </>
         ) : (
           <>
-            <Menu.Item 
+            <Menu.Item
               leftSection={<GithubIcon size={16} />}
               onClick={handleLogin}
             >
@@ -134,16 +145,22 @@ export function GitHubLoginButton() {
           </>
         )}
 
-        <Menu.Item 
-          leftSection={mounted && colorScheme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+        <Menu.Item
+          leftSection={
+            mounted && colorScheme === "dark" ? (
+              <Sun size={14} />
+            ) : (
+              <Moon size={14} />
+            )
+          }
           onClick={toggleColorScheme}
         >
-          {mounted && colorScheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          {mounted && colorScheme === "dark" ? "Light Mode" : "Dark Mode"}
         </Menu.Item>
 
         {user && (
-          <Menu.Item 
-            color="red" 
+          <Menu.Item
+            color="red"
             leftSection={<LogOut size={14} />}
             onClick={handleLogout}
           >

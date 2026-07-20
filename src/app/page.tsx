@@ -1,6 +1,15 @@
 "use client";
 
-import { Button, Card, Container, Grid, Group, Text, Title, ThemeIcon } from "@mantine/core";
+import {
+  Button,
+  Card,
+  Container,
+  Grid,
+  Group,
+  Text,
+  Title,
+  ThemeIcon,
+} from "@mantine/core";
 import Link from "next/link";
 import { Activity, FileAudio, Mic } from "lucide-react";
 
@@ -8,41 +17,65 @@ export default function Home() {
   const features = [
     {
       title: "Audio Visualizer",
-      description: "Visualize audio waveform and frequency spectrum in real-time.",
+      description:
+        "Visualize audio waveform and frequency spectrum in real-time.",
       icon: Activity,
       color: "violet",
-      href: "/visualizer"
+      href: "/visualizer",
     },
     {
       title: "Speech-to-Text",
-      description: "Convert audio and voice to text efficiently with high accuracy.",
+      description:
+        "Convert audio and voice to text efficiently with high accuracy.",
       icon: Mic,
       color: "teal",
-      href: "/speech-to-text"
+      href: "/speech-to-text",
     },
     {
       title: "Extract Metadata",
-      description: "Parse and view ID3 tags and technical details from your audio files.",
+      description:
+        "Parse and view ID3 tags and technical details from your audio files.",
       icon: FileAudio,
       color: "orange",
-      href: "/metadata"
-    }
+      href: "/metadata",
+    },
   ];
 
   return (
     <Container size="lg" py="xl" component="main">
       <div className="flex flex-col items-center text-center max-w-[800px] mx-auto py-16">
-        <Title order={1} className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
-          VANT - <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">Visualization Audio And Tools</span>
+        <Title
+          order={1}
+          className="text-4xl md:text-6xl font-bold tracking-tight mb-4"
+        >
+          VANT -{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">
+            Visualization Audio And Tools
+          </span>
         </Title>
         <Text c="dimmed" size="xl" className="mb-10 max-w-[600px]">
-          A comprehensive suite of web-based audio tools. Visualize waveforms, transcribe speech to text, and extract ID3 metadata effortlessly with AI-powered insights.
+          A comprehensive suite of web-based audio tools. Visualize waveforms,
+          transcribe speech to text, and extract ID3 metadata effortlessly with
+          AI-powered insights.
         </Text>
         <Group justify="center">
-          <Button component={Link} href="/visualizer" size="lg" radius="md" rightSection={<Activity size={18} />}>
+          <Button
+            component={Link}
+            href="/visualizer"
+            size="lg"
+            radius="md"
+            rightSection={<Activity size={18} />}
+          >
             Try Visualizer
           </Button>
-          <Button component={Link} href="/speech-to-text" variant="light" size="lg" radius="md" rightSection={<Mic size={18} />}>
+          <Button
+            component={Link}
+            href="/speech-to-text"
+            variant="light"
+            size="lg"
+            radius="md"
+            rightSection={<Mic size={18} />}
+          >
             Transcribe Audio
           </Button>
         </Group>
@@ -51,8 +84,20 @@ export default function Home() {
       <Grid gap="xl" mt={50}>
         {features.map((feature) => (
           <Grid.Col key={feature.title} span={{ base: 12, md: 4 }}>
-            <Card shadow="sm" padding="xl" radius="md" withBorder className="h-full flex flex-col hover:-translate-y-1 transition-transform duration-200">
-              <ThemeIcon size={50} radius="md" color={feature.color} variant="light" className="mb-4">
+            <Card
+              shadow="sm"
+              padding="xl"
+              radius="md"
+              withBorder
+              className="h-full flex flex-col hover:-translate-y-1 transition-transform duration-200"
+            >
+              <ThemeIcon
+                size={50}
+                radius="md"
+                color={feature.color}
+                variant="light"
+                className="mb-4"
+              >
                 <feature.icon size={26} />
               </ThemeIcon>
               <Title order={2} size="h4" fw={600} mb="sm">
@@ -61,9 +106,15 @@ export default function Home() {
               <Text size="sm" c="dimmed" className="flex-1">
                 {feature.description}
               </Text>
-              
+
               <Group mt="xl">
-                <Button component={Link} href={feature.href} variant="subtle" color={feature.color} px={0}>
+                <Button
+                  component={Link}
+                  href={feature.href}
+                  variant="subtle"
+                  color={feature.color}
+                  px={0}
+                >
                   Open Tool →
                 </Button>
               </Group>

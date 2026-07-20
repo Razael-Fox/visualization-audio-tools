@@ -6,14 +6,20 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 export async function POST(req: NextRequest) {
   try {
     if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: "Gemini API key not configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Gemini API key not configured" },
+        { status: 500 },
+      );
     }
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
     if (!file) {
-      return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No audio file provided" },
+        { status: 400 },
+      );
     }
 
     // Convert file to base64
@@ -21,12 +27,12 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
     const base64Audio = buffer.toString("base64");
 
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
       model: "gemini-3.1-flash-lite",
       generationConfig: {
         maxOutputTokens: 400,
         temperature: 0.5,
-      }
+      },
     });
 
     const prompt = `
@@ -44,11 +50,11 @@ Output strictly in the following format using bullet points:
       {
         inlineData: {
           mimeType: file.type || "audio/mp3",
-          data: base64Audio
-        }
-      }
+          data: base64Audio,
+        },
+      },
     ]);
-    
+
     const response = await result.response;
     const text = response.text();
 
@@ -57,7 +63,7 @@ Output strictly in the following format using bullet points:
     console.error("AI Insight error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to generate AI insight for audio" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

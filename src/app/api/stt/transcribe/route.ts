@@ -16,13 +16,16 @@ export async function POST(req: NextRequest) {
     }
 
     if (!process.env.GROQ_API_KEY) {
-      return NextResponse.json({ error: "Groq API key not configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Groq API key not configured" },
+        { status: 500 },
+      );
     }
 
     // Convert Web File to a Node.js compatible buffer/stream for Groq SDK
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    
+
     // We need to pass it in a format groq-sdk accepts
     const fileForGroq = new File([buffer], file.name, { type: file.type });
 
@@ -32,12 +35,15 @@ export async function POST(req: NextRequest) {
       response_format: "verbose_json", // include timestamps if needed
     });
 
-    return NextResponse.json({ text: transcription.text, details: transcription });
+    return NextResponse.json({
+      text: transcription.text,
+      details: transcription,
+    });
   } catch (error: any) {
     console.error("Transcription error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to transcribe audio" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
