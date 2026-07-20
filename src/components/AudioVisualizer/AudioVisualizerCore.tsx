@@ -136,7 +136,7 @@ export function AudioVisualizerCore() {
       if (!audioCtxRef.current) {
         try {
           const audioCtx = new (
-            window.AudioContext || window.webkitAudioContext
+            window.AudioContext || (window as any).webkitAudioContext
           )();
           const analyser = audioCtx.createAnalyser();
           analyser.fftSize = 256;
