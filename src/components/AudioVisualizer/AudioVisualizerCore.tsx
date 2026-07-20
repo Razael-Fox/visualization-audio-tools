@@ -385,15 +385,17 @@ export function AudioVisualizerCore() {
                 <Text size="sm" fw={500}>
                   Volume
                 </Text>
-                <Slider
-                  value={volume}
-                  onChange={handleVolumeChange}
+                <input
+                  type="range"
                   min={0}
                   max={1}
                   step={0.01}
-                  size="xl"
-                  radius="xl"
-                  style={{ flex: 1 }}
+                  value={volume}
+                  onChange={(e) =>
+                    handleVolumeChange(parseFloat(e.target.value))
+                  }
+                  className="flex-1 h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-violet-500"
+                  style={{ minWidth: "150px" }}
                 />
               </Group>
             </Group>
