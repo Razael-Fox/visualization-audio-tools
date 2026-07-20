@@ -351,7 +351,11 @@ export function AudioVisualizerCore() {
               </Group>
             )}
 
-            <Group justify="space-between" mt="sm">
+            <Group
+              mt="sm"
+              align="center"
+              style={{ gap: "1rem", flexWrap: "wrap" }}
+            >
               <Group gap="sm">
                 <ActionIcon
                   size="xl"
@@ -373,9 +377,13 @@ export function AudioVisualizerCore() {
                 </ActionIcon>
               </Group>
 
-              <Group gap="xs" w={{ base: "100%", sm: 200 }}>
+              <Group
+                gap="md"
+                wrap="nowrap"
+                style={{ flex: 1, minWidth: "200px" }}
+              >
                 <Text size="sm" fw={500}>
-                  Vol
+                  Volume
                 </Text>
                 <Slider
                   value={volume}
@@ -383,8 +391,9 @@ export function AudioVisualizerCore() {
                   min={0}
                   max={1}
                   step={0.01}
-                  size="lg"
-                  className="flex-1"
+                  size="xl"
+                  radius="xl"
+                  style={{ flex: 1 }}
                 />
               </Group>
             </Group>
