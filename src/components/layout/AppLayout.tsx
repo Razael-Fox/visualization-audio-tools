@@ -114,21 +114,28 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         hiddenFrom="sm"
         style={{
           position: "fixed",
-          bottom: "1.5rem",
-          right: "1.5rem",
+          bottom: "max(1.5rem, env(safe-area-inset-bottom))",
+          right: "max(1.5rem, env(safe-area-inset-right))",
           zIndex: 1000,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "56px",
+          height: "56px",
+          backgroundColor: "var(--mantine-color-blue-filled)",
+          borderRadius: "50%",
+          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+          cursor: "pointer",
         }}
+        onClick={toggle}
       >
         <Burger
           opened={opened}
           onClick={toggle}
-          size="md"
+          size="sm"
           color="white"
           style={{
-            backgroundColor: "var(--mantine-color-blue-filled)",
-            padding: "0.5rem",
-            borderRadius: "50%",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            pointerEvents: "none",
           }}
         />
       </Box>
@@ -137,8 +144,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         hiddenFrom="sm"
         style={{
           position: "fixed",
-          top: "1rem",
-          right: "1rem",
+          top: "max(1rem, env(safe-area-inset-top))",
+          right: "max(1rem, env(safe-area-inset-right))",
           zIndex: 1000,
         }}
       >
