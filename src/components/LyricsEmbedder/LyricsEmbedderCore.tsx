@@ -895,37 +895,44 @@ export function LyricsEmbedderCore() {
                         </Alert>
                       )}
 
-                      <div className="flex justify-between items-center bg-gray-50 dark:bg-dark-600 p-3 rounded border border-gray-100 dark:border-dark-500">
-                        <div>
-                          <Text size="sm" fw={600}>
-                            How to Sync:
-                          </Text>
-                          <Text size="xs" c="dimmed">
-                            Play the music. Press the button below at the exact
-                            moment each highlighted line starts.
-                          </Text>
-                        </div>
-                        <Group gap="xs">
-                          <Button
-                            variant="light"
-                            color="pink"
-                            size="xs"
-                            leftSection={<Sparkles size={14} />}
-                            loading={aiSyncLoading}
-                            onClick={handleAiSync}
-                            disabled={!audioFile || !lyricsText.trim()}
-                          >
-                            Auto-Sync with AI
-                          </Button>
-                          <Button
-                            variant="outline"
-                            color="red"
-                            size="xs"
-                            onClick={handleResetSync}
-                          >
-                            Reset All Timestamps
-                          </Button>
-                        </Group>
+                      <div className="bg-gray-50 dark:bg-dark-600 p-4 rounded border border-gray-100 dark:border-dark-500">
+                        <Stack gap="xs">
+                          <div>
+                            <Text size="md" fw={700} c="pink">
+                              How to Sync:
+                            </Text>
+                            <Text size="xs" c="dimmed" mt="xs">
+                              Play the music. Press the button below at the
+                              exact moment each highlighted line starts.
+                            </Text>
+                          </div>
+
+                          <Stack gap="xs" mt="xs">
+                            <Button
+                              variant="light"
+                              color="pink"
+                              size="sm"
+                              leftSection={<Sparkles size={14} />}
+                              loading={aiSyncLoading}
+                              onClick={handleAiSync}
+                              disabled={!audioFile || !lyricsText.trim()}
+                              fullWidth
+                            >
+                              {aiSyncLoading
+                                ? "AI is Aligning Lyrics..."
+                                : "Auto-Sync with AI"}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              color="red"
+                              size="sm"
+                              onClick={handleResetSync}
+                              fullWidth
+                            >
+                              Reset All Timestamps
+                            </Button>
+                          </Stack>
+                        </Stack>
                       </div>
 
                       {/* Main Sync Button */}
