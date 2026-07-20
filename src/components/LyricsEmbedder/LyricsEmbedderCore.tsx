@@ -648,6 +648,8 @@ export function LyricsEmbedderCore() {
 
             {/* Editing Section */}
             <Tabs
+              variant="pills"
+              color="pink"
               value={activeTab}
               onChange={(val) => val && setActiveTab(val)}
             >
