@@ -9,13 +9,13 @@ import {
   Group,
   Text,
   UnstyledButton,
+  Box,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { Activity, FileAudio, Mic, Home } from "lucide-react";
-import { ColorSchemesSwitcher } from "@/components/color-schemes-switcher";
 import { GitHubLoginButton } from "@/components/Auth/GitHubLoginButton";
 import { SiteBanner } from "@/components/SiteBanner/SiteBanner";
 
@@ -35,83 +35,116 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }, [pathname, close]);
 
   return (
-    <AppShell
-      header={{ height: 60 }}
-      navbar={{
-        width: 300,
-        breakpoint: "sm",
-        collapsed: { mobile: !opened },
-      }}
-      padding="md"
-    >
-      <AppShellHeader>
-        <Group h="100%" px="md" justify="space-between">
-          <Group>
-            <Burger
-              opened={opened}
-              onClick={toggle}
-              hiddenFrom="sm"
-              size="sm"
-            />
-            <Text
-              component={Link}
-              href="/"
-              size="lg"
-              fw={700}
-              variant="gradient"
-              gradient={{ from: "blue", to: "cyan", deg: 90 }}
-            >
-              VANT
-            </Text>
+    <>
+      <AppShell
+        header={{ height: { base: 0, sm: 60 } }}
+        navbar={{
+          width: 300,
+          breakpoint: "sm",
+          collapsed: { mobile: !opened },
+        }}
+        padding="md"
+      >
+        <AppShellHeader visibleFrom="sm">
+          <Group h="100%" px="md" justify="space-between">
+            <Group>
+              <Text
+                component={Link}
+                href="/"
+                size="lg"
+                fw={700}
+                variant="gradient"
+                gradient={{ from: "blue", to: "cyan", deg: 90 }}
+              >
+                VANT
+              </Text>
+            </Group>
+            <Group>
+              {/* Desktop Profile & Theme are handled here */}
+              <GitHubLoginButton />
+            </Group>
           </Group>
-          <Group>
-            <GitHubLoginButton />
-            <ColorSchemesSwitcher />
-          </Group>
-        </Group>
-      </AppShellHeader>
+        </AppShellHeader>
 
-      <AppShellNavbar p="md">
-        <Group
-          flex={1}
+        <AppShellNavbar p="md">
+          <Group
+            flex={1}
+            style={{
+              flexDirection: "column",
+              gap: "0.5rem",
+              alignItems: "stretch",
+            }}
+          >
+            {links.map((item) => (
+              <UnstyledButton
+                component={Link}
+                href={item.link}
+                key={item.label}
+                data-active={item.link === pathname || undefined}
+                className={`flex items-center gap-3 p-3 rounded-md transition-colors ${
+                  item.link === pathname
+                    ? ""
+                    : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+                style={
+                  item.link === pathname
+                    ? {
+                        backgroundColor: `var(--mantine-color-${item.color}-light)`,
+                        color: `var(--mantine-color-${item.color}-light-color)`,
+                        fontWeight: 500,
+                      }
+                    : {}
+                }
+              >
+                <item.icon size={20} />
+                <Text size="sm">{item.label}</Text>
+              </UnstyledButton>
+            ))}
+          </Group>
+        </AppShellNavbar>
+
+        <AppShellMain>
+          <SiteBanner />
+          {children}
+        </AppShellMain>
+      </AppShell>
+
+      {/* Floating Buttons for Mobile */}
+      <Box
+        hiddenFrom="sm"
+        style={{
+          position: "fixed",
+          bottom: "1.5rem",
+          right: "1.5rem",
+          zIndex: 1000,
+        }}
+      >
+        <Burger
+          opened={opened}
+          onClick={toggle}
+          size="md"
+          color="white"
           style={{
-            flexDirection: "column",
-            gap: "0.5rem",
-            alignItems: "stretch",
+            backgroundColor: "var(--mantine-color-blue-filled)",
+            padding: "0.5rem",
+            borderRadius: "50%",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
           }}
-        >
-          {links.map((item) => (
-            <UnstyledButton
-              component={Link}
-              href={item.link}
-              key={item.label}
-              data-active={item.link === pathname || undefined}
-              className={`flex items-center gap-3 p-3 rounded-md transition-colors ${
-                item.link === pathname
-                  ? ""
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
-              }`}
-              style={
-                item.link === pathname
-                  ? {
-                      backgroundColor: `var(--mantine-color-${item.color}-light)`,
-                      color: `var(--mantine-color-${item.color}-light-color)`,
-                      fontWeight: 500,
-                    }
-                  : {}
-              }
-            >
-              <item.icon size={20} />
-              <Text size="sm">{item.label}</Text>
-            </UnstyledButton>
-          ))}
-        </Group>
-      </AppShellNavbar>
+        />
+      </Box>
 
-      <AppShellMain>
-        <SiteBanner />
-        {children}
-      </AppShellMain>
-    </AppShell>
+      <Box
+        hiddenFrom="sm"
+        style={{
+          position: "fixed",
+          top: "1rem",
+          right: "1rem",
+          zIndex: 1000,
+        }}
+      >
+        <GitHubLoginButton />
+      </Box>
+    </>
   );
 }
+

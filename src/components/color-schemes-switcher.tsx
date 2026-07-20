@@ -4,7 +4,7 @@ import { useMantineColorScheme, ActionIcon } from "@mantine/core";
 import { Sun, Moon } from "lucide-react";
 
 export function ColorSchemesSwitcher() {
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const { toggleColorScheme } = useMantineColorScheme();
 
   return (
     <ActionIcon 

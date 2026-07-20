@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
-import { Button, Avatar, Menu } from '@mantine/core';
-import { LogOut } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Avatar, Menu, useMantineColorScheme } from '@mantine/core';
+import { LogOut, Sun, Moon, User } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useUsageLimit } from '@/hooks/useUsageLimit';
 
@@ -27,6 +27,13 @@ function GithubIcon({ size = 16 }: { size?: number }) {
 
 export function GitHubLoginButton() {
   const { user, isInitializing } = useUsageLimit();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Check if we are inside the popup window spawned for auth
@@ -91,24 +98,50 @@ export function GitHubLoginButton() {
     await supabase.auth.signOut();
   };
 
-  if (isInitializing) {
-    return <Button loading variant="light" radius="md">...</Button>;
-  }
-
-  if (user) {
-    return (
-      <Menu shadow="md" width={200}>
-        <Menu.Target>
+  return (
+    <Menu shadow="md" width={220} position="bottom-end">
+      <Menu.Target>
+        {isInitializing ? (
+           <Avatar radius="xl" style={{ cursor: 'pointer' }} />
+        ) : user ? (
           <Avatar 
             src={user.user_metadata.avatar_url} 
             radius="xl" 
             style={{ cursor: 'pointer' }}
           />
-        </Menu.Target>
+        ) : (
+          <Avatar radius="xl" style={{ cursor: 'pointer' }}>
+            <User size={20} />
+          </Avatar>
+        )}
+      </Menu.Target>
 
-        <Menu.Dropdown>
-          <Menu.Label>Logged in as {user.user_metadata.user_name || user.email}</Menu.Label>
-          <Menu.Divider />
+      <Menu.Dropdown>
+        {user ? (
+          <>
+            <Menu.Label>Logged in as {user.user_metadata.user_name || user.email}</Menu.Label>
+            <Menu.Divider />
+          </>
+        ) : (
+          <>
+            <Menu.Item 
+              leftSection={<GithubIcon size={16} />}
+              onClick={handleLogin}
+            >
+              Login with GitHub
+            </Menu.Item>
+            <Menu.Divider />
+          </>
+        )}
+
+        <Menu.Item 
+          leftSection={mounted && colorScheme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+          onClick={toggleColorScheme}
+        >
+          {mounted && colorScheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        </Menu.Item>
+
+        {user && (
           <Menu.Item 
             color="red" 
             leftSection={<LogOut size={14} />}
@@ -116,19 +149,8 @@ export function GitHubLoginButton() {
           >
             Logout
           </Menu.Item>
-        </Menu.Dropdown>
-      </Menu>
-    );
-  }
-
-  return (
-    <Button 
-      leftSection={<GithubIcon size={16} />} 
-      variant="default" 
-      onClick={handleLogin}
-      radius="md"
-    >
-      Login with GitHub
-    </Button>
+        )}
+      </Menu.Dropdown>
+    </Menu>
   );
 }
