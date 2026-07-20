@@ -18,7 +18,7 @@ import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { Activity, FileAudio, Mic, Home } from "lucide-react";
+import { Activity, FileAudio, Mic, Home, Music } from "lucide-react";
 import { GitHubLoginButton } from "@/components/Auth/GitHubLoginButton";
 import { SiteBanner } from "@/components/SiteBanner/SiteBanner";
 import { VantFloating } from "@/components/VantFloating";
@@ -42,6 +42,12 @@ const links = [
     label: "Extract Metadata",
     icon: FileAudio,
     color: "orange",
+  },
+  {
+    link: "/lyrics-embedder",
+    label: "Embed Lyrics",
+    icon: Music,
+    color: "pink",
   },
 ];
 

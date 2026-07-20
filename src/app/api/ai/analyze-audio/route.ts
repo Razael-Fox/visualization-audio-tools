@@ -62,7 +62,12 @@ Output strictly in the following format using bullet points:
   } catch (error) {
     console.error("AI Insight error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to generate AI insight for audio" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to generate AI insight for audio",
+      },
       { status: 500 },
     );
   }

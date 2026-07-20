@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import {
-  ColorSchemeScript,
-  mantineHtmlProps,
-} from "@mantine/core";
+import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 import { AppLayout } from "@/components/layout/AppLayout";

@@ -127,7 +127,11 @@ export function SpeechToTextCore() {
       setTranscription(data.text);
     } catch (err: unknown) {
       console.error(err);
-      setError(err instanceof Error ? err.message : "An error occurred during transcription");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An error occurred during transcription",
+      );
     } finally {
       setLoading(false);
     }
@@ -351,7 +355,9 @@ export function SpeechToTextCore() {
                               color="stt"
                               variant="subtle"
                               onClick={() => {
-                                const blob = new Blob([aiInsight], { type: "text/plain" });
+                                const blob = new Blob([aiInsight], {
+                                  type: "text/plain",
+                                });
                                 const url = URL.createObjectURL(blob);
                                 const a = document.createElement("a");
                                 a.href = url;

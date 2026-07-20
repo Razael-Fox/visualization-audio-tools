@@ -1,6 +1,6 @@
 export function VantFloating() {
   return (
-    <div 
+    <div
       style={{
         position: "fixed",
         top: "max(1rem, env(safe-area-inset-top))",

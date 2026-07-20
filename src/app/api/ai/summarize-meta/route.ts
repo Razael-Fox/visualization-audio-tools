@@ -48,7 +48,12 @@ Provide a 2-3 sentence analysis of the data and suggest missing tags if any. Out
   } catch (error) {
     console.error("AI Insight error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to generate AI insight" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to generate AI insight",
+      },
       { status: 500 },
     );
   }

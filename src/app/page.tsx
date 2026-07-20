@@ -11,7 +11,7 @@ import {
   ThemeIcon,
 } from "@mantine/core";
 import Link from "next/link";
-import { Activity, FileAudio, Mic } from "lucide-react";
+import { Activity, FileAudio, Mic, Music } from "lucide-react";
 
 export default function Home() {
   const features = [
@@ -38,6 +38,14 @@ export default function Home() {
       icon: FileAudio,
       color: "orange",
       href: "/metadata",
+    },
+    {
+      title: "Lyrics Embedder",
+      description:
+        "Embed synchronized and unsynchronized lyrics (.lrc/.txt) into audio files.",
+      icon: Music,
+      color: "pink",
+      href: "/lyrics-embedder",
     },
   ];
 
@@ -83,7 +91,7 @@ export default function Home() {
 
       <Grid gap="xl" mt={50}>
         {features.map((feature) => (
-          <Grid.Col key={feature.title} span={{ base: 12, md: 4 }}>
+          <Grid.Col key={feature.title} span={{ base: 12, sm: 6, md: 3 }}>
             <Card
               shadow="sm"
               padding="xl"
