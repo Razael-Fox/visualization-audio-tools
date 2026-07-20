@@ -107,7 +107,11 @@ const generateLRC = (items: SyncedLyric[]): string => {
 
 export function LyricsEmbedderCore() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const wavesurfer = useRef<WaveSurfer | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const requestRef = useRef<number>(0);
   const theme = useMantineTheme();
   const colorScheme = useComputedColorScheme("dark");
 
@@ -200,27 +204,109 @@ export function LyricsEmbedderCore() {
       waveColor,
       progressColor,
       cursorColor,
-      barWidth: 2,
-      barGap: 1,
-      barRadius: 2,
-      height: 80,
+      barWidth: 1,
+      barGap: 0,
+      height: 24, // Thin seekbar/timeline
       normalize: true,
     });
+
+    const drawWaveform = () => {
+      if (!analyserRef.current || !canvasRef.current) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const analyser = analyserRef.current;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      const draw = () => {
+        requestRef.current = requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const center = canvas.height / 2;
+        const barWidth = (canvas.width / bufferLength) * 1.5;
+        let x = 0;
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, "#f472b6"); // pink-400
+        gradient.addColorStop(0.5, "#db2777"); // pink-600
+        gradient.addColorStop(1, "#f472b6"); // pink-400
+
+        for (let i = 0; i < bufferLength; i++) {
+          const rawHeight = dataArray[i];
+          const barHeight = (rawHeight / 255) * (canvas.height * 0.85);
+
+          ctx.fillStyle = gradient;
+          ctx.fillRect(x, center - barHeight / 2, barWidth - 1.5, barHeight);
+
+          x += barWidth;
+        }
+      };
+
+      draw();
+    };
 
     wavesurfer.current.on("ready", () => {
       setIsReady(true);
       setDuration(wavesurfer.current?.getDuration() || 0);
+
+      // Init Web Audio API connection
+      if (!audioCtxRef.current) {
+        try {
+          const audioCtx = new (
+            window.AudioContext ||
+            (
+              window as typeof window & {
+                webkitAudioContext: typeof AudioContext;
+              }
+            ).webkitAudioContext
+          )();
+          const analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 256;
+
+          const media = wavesurfer.current?.getMediaElement();
+          if (media) {
+            const source = audioCtx.createMediaElementSource(media);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+
+            audioCtxRef.current = audioCtx;
+            analyserRef.current = analyser;
+          }
+        } catch (e) {
+          console.error("Web Audio API error", e);
+        }
+      }
     });
 
-    wavesurfer.current.on("play", () => setIsPlaying(true));
-    wavesurfer.current.on("pause", () => setIsPlaying(false));
-    wavesurfer.current.on("finish", () => setIsPlaying(false));
+    wavesurfer.current.on("play", () => {
+      setIsPlaying(true);
+      if (audioCtxRef.current?.state === "suspended") {
+        audioCtxRef.current.resume();
+      }
+      drawWaveform();
+    });
+
+    wavesurfer.current.on("pause", () => {
+      setIsPlaying(false);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    });
+
+    wavesurfer.current.on("finish", () => {
+      setIsPlaying(false);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    });
 
     wavesurfer.current.on("timeupdate", (time) => {
       setCurrentTime(time);
     });
 
     return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
       wavesurfer.current?.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -599,11 +685,22 @@ export function LyricsEmbedderCore() {
                   ` (${metadata.artist || "Unknown Artist"} - ${metadata.title})`}
               </Text>
 
-              {!isReady && <Skeleton height={80} radius="md" animate />}
+              {!isReady && <Skeleton height={132} radius="md" animate />}
+
               <div
-                ref={containerRef}
-                className={`w-full relative z-10 ${!isReady ? "hidden" : ""}`}
-              />
+                className={`flex flex-col gap-2 ${!isReady ? "hidden" : ""}`}
+              >
+                {/* Real-time Animated Waveform Canvas */}
+                <canvas
+                  ref={canvasRef}
+                  width={800}
+                  height={100}
+                  className="w-full h-[100px] bg-dark-800 dark:bg-dark-900 rounded-md shadow-inner pointer-events-none"
+                />
+
+                {/* Thin Seeker Timeline */}
+                <div ref={containerRef} className="w-full min-h-[24px]" />
+              </div>
 
               {isReady && (
                 <Group justify="space-between" mt="xs">
