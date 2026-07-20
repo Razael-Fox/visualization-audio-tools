@@ -773,10 +773,28 @@ export function LyricsEmbedderCore() {
 
               <Tabs.Panel value="editor" pt="md">
                 <Stack gap="xs">
-                  <Text size="sm" c="dimmed">
-                    Enter raw lyrics below. To sync lines, paste the text here,
-                    then switch to the &quot;Tap Sync Tool&quot;. If you already
-                    have an .lrc file, you can upload it directly.
+                  <Text size="sm" c="dimmed" component="div">
+                    <Text fw={600} size="sm" c="pink" mb="xs">
+                      How to add lyrics:
+                    </Text>
+                    <ul className="list-disc pl-5 space-y-1 text-xs">
+                      <li>
+                        <strong>If you have a synchronized (.lrc) file:</strong>{" "}
+                        Upload it above or paste it here to view, edit, or
+                        preview it directly.
+                      </li>
+                      <li>
+                        <strong>If you have plain text lyrics:</strong> Paste
+                        the text below, then switch to the{" "}
+                        <strong>&quot;Tap Sync Tool&quot;</strong> tab to align
+                        them manually, or use{" "}
+                        <strong>&quot;Auto-Sync with AI&quot;</strong>.
+                      </li>
+                      <li>
+                        <strong>Writing manually:</strong> Simply type your
+                        lyrics line-by-line in the text area below.
+                      </li>
+                    </ul>
                   </Text>
                   <Textarea
                     placeholder="[00:10.50]Line 1
