@@ -36,6 +36,7 @@ import {
   CheckCircle,
   Clock,
   Sparkles,
+  Clipboard,
 } from "lucide-react";
 import { parseBlob } from "music-metadata";
 import { useUsageLimit } from "@/hooks/useUsageLimit";
@@ -391,6 +392,25 @@ export function LyricsEmbedderCore() {
       setAiSyncError(errMsg);
     } finally {
       setAiSyncLoading(false);
+    }
+  };
+
+  // Paste lyrics directly from clipboard
+  const handlePasteFromClipboard = async () => {
+    try {
+      if (typeof window === "undefined" || !navigator?.clipboard?.readText) {
+        throw new Error(
+          "Clipboard API is not supported by your browser or device.",
+        );
+      }
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        handleLyricsTextChange(text);
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setEmbedError(`Failed to paste from clipboard: ${errMsg}`);
     }
   };
 
@@ -805,6 +825,23 @@ export function LyricsEmbedderCore() {
                       </li>
                     </ul>
                   </Text>
+
+                  <div className="flex flex-col gap-1 mt-1">
+                    <Text size="xs" c="dimmed">
+                      atau paste dari clipboard:
+                    </Text>
+                    <Button
+                      variant="light"
+                      color="pink"
+                      size="xs"
+                      onClick={handlePasteFromClipboard}
+                      className="self-start"
+                      leftSection={<Clipboard size={14} />}
+                    >
+                      Paste dari Clipboard
+                    </Button>
+                  </div>
+
                   <Textarea
                     placeholder="[00:10.50]Line 1
 [00:15.20]Line 2
