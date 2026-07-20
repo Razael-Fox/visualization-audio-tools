@@ -452,7 +452,12 @@ export function LyricsEmbedderCore() {
         if (metadata.title) writer.setFrame("TIT2", metadata.title);
         if (metadata.artist) writer.setFrame("TPE1", [metadata.artist]);
         if (metadata.album) writer.setFrame("TALB", metadata.album);
-        if (metadata.year) writer.setFrame("TYER", metadata.year);
+        if (metadata.year) {
+          const yearNum = parseInt(metadata.year, 10);
+          if (!isNaN(yearNum)) {
+            writer.setFrame("TYER", yearNum);
+          }
+        }
         if (metadata.genre) writer.setFrame("TCON", [metadata.genre]);
         if (metadata.track) writer.setFrame("TRCK", metadata.track);
 
@@ -487,13 +492,12 @@ export function LyricsEmbedderCore() {
       if (syncedLyrics.length > 0) {
         writer.setFrame("SYLT", {
           language: "eng",
-          format: 2, // Absolute time in milliseconds
+          timestampFormat: 2, // Absolute time in milliseconds
           type: 1, // Lyrics
           description: "Lyrics Sync",
-          lyrics: syncedLyrics.map((item) => ({
-            text: item.text,
-            timestamp: Math.round(item.time * 1000), // ms
-          })),
+          text: syncedLyrics.map(
+            (item) => [item.text, Math.round(item.time * 1000)] as const,
+          ),
         });
       }
 
