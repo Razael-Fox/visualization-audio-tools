@@ -1,5 +1,6 @@
-import { Container, Title, Text } from "@mantine/core";
+import { Container, Title, Text, Alert } from "@mantine/core";
 import { LyricsEmbedderCore } from "@/components/LyricsEmbedder/LyricsEmbedderCore";
+import { Info } from "lucide-react";
 
 export const metadata = {
   title: "Lyrics Embedder - VANT",
@@ -26,6 +27,19 @@ export default function LyricsEmbedderPage() {
       <div className="mt-8">
         <LyricsEmbedderCore />
       </div>
+
+      <Alert
+        variant="light"
+        color="blue"
+        title="Format Support Note"
+        icon={<Info size={16} />}
+        mt="lg"
+        radius="md"
+      >
+        Currently, this tool only supports embedding lyrics into **.mp3** files
+        (using ID3v2.3 tags). Support for other audio formats (such as .opus,
+        .ogg, .m4a, and .flac) is planned and will be added in a future update.
+      </Alert>
     </Container>
   );
 }
