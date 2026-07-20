@@ -125,7 +125,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </AppShellNavbar>
 
         <AppShellMain>
-          <Box pt={{ base: "4.5rem", sm: 0 }}>
+          <Box pt={{ base: pathname === "/" ? 0 : "4.5rem", sm: 0 }}>
             <SiteBanner />
             {children}
           </Box>
