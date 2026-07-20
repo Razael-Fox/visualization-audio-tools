@@ -502,8 +502,7 @@ export function LyricsEmbedderCore() {
       }
 
       // Write tags and build file blob
-      writer.addTag();
-      const taggedBuffer = writer.arrayBuffer;
+      const taggedBuffer = writer.addTag();
       const blob = new Blob([taggedBuffer], { type: "audio/mpeg" });
       const url = URL.createObjectURL(blob);
 
