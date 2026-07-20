@@ -146,6 +146,22 @@ export function SpeechToTextCore() {
     URL.revokeObjectURL(url);
   };
 
+  const truncateFileName = (name: string, maxLength = 35) => {
+    if (name.length <= maxLength) return name;
+
+    const lastDotIndex = name.lastIndexOf(".");
+    if (lastDotIndex === -1) return name.slice(0, maxLength - 3) + "...";
+
+    const ext = name.slice(lastDotIndex);
+    const nameWithoutExt = name.slice(0, lastDotIndex);
+
+    const charsToShow = maxLength - ext.length - 3;
+    const frontChars = Math.ceil(charsToShow * 0.7);
+    const backChars = Math.floor(charsToShow * 0.3);
+
+    return `${nameWithoutExt.slice(0, frontChars)}...${nameWithoutExt.slice(-backChars)}${ext}`;
+  };
+
   return (
     <Card withBorder shadow="sm" radius="md" p="xl" className="w-full">
       <Stack gap="lg">
@@ -198,23 +214,24 @@ export function SpeechToTextCore() {
 
         <Collapse expanded={!!file}>
           <Stack gap="md" mt="md">
-            <Group
-              justify="space-between"
+            <Stack
+              gap="sm"
               p="sm"
               className="bg-gray-50 dark:bg-dark-600 rounded-md border border-gray-100 dark:border-dark-500"
             >
-              <Text size="sm" fw={500} truncate className="flex-1">
-                {file?.name}
+              <Text size="sm" fw={500} className="text-center sm:text-left">
+                {file ? truncateFileName(file.name) : ""}
               </Text>
               <Button
                 size="sm"
                 color="stt"
                 onClick={handleTranscribe}
                 loading={loading}
+                fullWidth
               >
                 Transcribe Now
               </Button>
-            </Group>
+            </Stack>
 
             {error && (
               <Text
