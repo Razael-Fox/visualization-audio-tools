@@ -63,24 +63,58 @@ interface AudioMetadata {
   };
 }
 
+// Parse timestamp to seconds helper
+const parseTimestamp = (tsStr: string): number | null => {
+  const cleanStr = tsStr.replace(",", ".");
+  let normalizedStr = cleanStr;
+  const colonCount = (normalizedStr.match(/:/g) || []).length;
+  if (colonCount === 2) {
+    const lastColonIndex = normalizedStr.lastIndexOf(":");
+    const lastPart = normalizedStr.substring(lastColonIndex + 1);
+    if (lastPart.length <= 2) {
+      normalizedStr =
+        normalizedStr.substring(0, lastColonIndex) + "." + lastPart;
+    }
+  }
+
+  const parts = normalizedStr.split(":");
+  if (parts.length === 0) return null;
+
+  let seconds = 0;
+  let multiplier = 1;
+
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const val = parseFloat(parts[i]);
+    if (isNaN(val)) return null;
+
+    seconds += val * multiplier;
+    multiplier *= 60;
+  }
+
+  return seconds;
+};
+
 // Parse LRC Helper
 const parseLRC = (text: string): SyncedLyric[] => {
   const lines = text.split(/\r?\n/);
   const result: SyncedLyric[] = [];
-  const timeRegex = /\[(\d+):(\d+(?:\.\d+)?)\]/g;
+  const timeRegex = /[\[\(]\s*(\d+(?:[:\.,]\d+)+)\s*[\]\)]/g;
 
   for (const line of lines) {
     timeRegex.lastIndex = 0;
     const timestamps: number[] = [];
     let match;
     while ((match = timeRegex.exec(line)) !== null) {
-      const minutes = parseInt(match[1], 10);
-      const seconds = parseFloat(match[2]);
-      timestamps.push(minutes * 60 + seconds);
+      const parsedTime = parseTimestamp(match[1]);
+      if (parsedTime !== null) {
+        timestamps.push(parsedTime);
+      }
     }
 
     if (timestamps.length > 0) {
-      const cleanText = line.replace(/\[\d+:\d+(?:\.\d+)?\]/g, "").trim();
+      const cleanText = line
+        .replace(/[\[\(]\s*\d+(?:[:\.,]\d+)+\s*[\]\)]/g, "")
+        .trim();
       for (const time of timestamps) {
         result.push({ time, text: cleanText });
       }
@@ -376,6 +410,14 @@ export function LyricsEmbedderCore() {
       }
 
       if (data.lrc) {
+        // Validate if there are any timestamps returned
+        const parsed = parseLRC(data.lrc);
+        if (parsed.length === 0) {
+          throw new Error(
+            "AI completed but returned no valid timestamps. Please verify your lyrics and audio track.",
+          );
+        }
+
         // Successfully got synced LRC from AI! Update states
         handleLyricsTextChange(data.lrc);
         setAiSyncSuccess(true);

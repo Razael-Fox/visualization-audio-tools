@@ -53,10 +53,18 @@ ${lyricsText}
 ---
 
 Generate the lyrics in standard LRC format. For every line of the lyrics, listen to the audio and find the exact time (minutes, seconds, and centiseconds) where that line begins, and prepend it with [mm:ss.xx] timestamp.
-Do not change the lyrics wording, just add timestamps.
-If a line is purely instrumental or has a long pause, do not invent text, just skip to the next active line.
-DO NOT include any conversational introduction, markdown code block wraps (like \`\`\`lrc or \`\`\`), or concluding remarks.
-Output ONLY the raw LRC text format starting with timestamps.
+
+Format rules:
+1. Prepend every line with a bracketed timestamp: [minutes:seconds.centiseconds] (e.g., [01:23.45]).
+2. Do not change the lyrics wording, just add timestamps.
+3. If a line is purely instrumental or has a long pause, do not invent text, just skip to the next active line.
+4. DO NOT include any conversational introduction, markdown code block wraps (like \`\`\`lrc or \`\`\`), or concluding remarks.
+5. Output ONLY the raw LRC text format.
+
+Example of expected output:
+[00:04.50] First line of song
+[00:08.12] Second line of song
+[00:12.90] Third line of song
     `;
 
     const result = await model.generateContent([
