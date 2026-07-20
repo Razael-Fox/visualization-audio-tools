@@ -83,12 +83,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </Group>
         </AppShellHeader>
 
-        <AppShellNavbar p="md">
+        <AppShellNavbar p="md" pt={{ base: 140, sm: "md" }}>
           <Group
             flex={1}
             style={{
               flexDirection: "column",
-              gap: "0.5rem",
+              gap: "0.25rem",
               alignItems: "stretch",
             }}
           >
@@ -98,7 +98,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 href={item.link}
                 key={item.label}
                 data-active={item.link === pathname || undefined}
-                className={`flex items-center gap-3 p-3 rounded-md transition-colors ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
                   item.link === pathname
                     ? ""
                     : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
