@@ -135,7 +135,6 @@ export function AudioVisualizerCore() {
 
       if (!audioCtxRef.current) {
         try {
-          // @ts-expect-error webkitAudioContext is Safari specific
           const audioCtx = new (
             window.AudioContext || window.webkitAudioContext
           )();
