@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import {
   ColorSchemeScript,
   mantineHtmlProps,
-  MantineProvider,
 } from "@mantine/core";
-import theme from "./theme";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Outfit, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
@@ -66,9 +65,9 @@ export default function RootLayout({
       <body
         className={`antialiased ${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} font-sans`}
       >
-        <MantineProvider theme={theme} defaultColorScheme="auto">
+        <ThemeProvider>
           <AppLayout>{children}</AppLayout>
-        </MantineProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
