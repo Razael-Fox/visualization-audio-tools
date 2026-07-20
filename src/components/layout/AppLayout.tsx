@@ -10,6 +10,7 @@ import {
   Text,
   UnstyledButton,
   Box,
+  Portal,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
@@ -110,47 +111,49 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </AppShell>
 
       {/* Floating Buttons for Mobile */}
-      <Box
-        hiddenFrom="sm"
-        style={{
-          position: "fixed",
-          bottom: "max(1.5rem, env(safe-area-inset-bottom))",
-          right: "max(1.5rem, env(safe-area-inset-right))",
-          zIndex: 1000,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: "56px",
-          height: "56px",
-          backgroundColor: "var(--mantine-color-blue-filled)",
-          borderRadius: "50%",
-          boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-          cursor: "pointer",
-        }}
-        onClick={toggle}
-      >
-        <Burger
-          opened={opened}
-          onClick={toggle}
-          size="sm"
-          color="white"
+      <Portal>
+        <Box
+          hiddenFrom="sm"
           style={{
-            pointerEvents: "none",
+            position: "fixed",
+            bottom: "max(1.5rem, env(safe-area-inset-bottom))",
+            right: "max(1.5rem, env(safe-area-inset-right))",
+            zIndex: 1000,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "56px",
+            height: "56px",
+            backgroundColor: "var(--mantine-color-blue-filled)",
+            borderRadius: "50%",
+            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+            cursor: "pointer",
           }}
-        />
-      </Box>
+          onClick={toggle}
+        >
+          <Burger
+            opened={opened}
+            onClick={toggle}
+            size="sm"
+            color="white"
+            style={{
+              pointerEvents: "none",
+            }}
+          />
+        </Box>
 
-      <Box
-        hiddenFrom="sm"
-        style={{
-          position: "fixed",
-          top: "max(1rem, env(safe-area-inset-top))",
-          right: "max(1rem, env(safe-area-inset-right))",
-          zIndex: 1000,
-        }}
-      >
-        <GitHubLoginButton />
-      </Box>
+        <Box
+          hiddenFrom="sm"
+          style={{
+            position: "fixed",
+            top: "max(1rem, env(safe-area-inset-top))",
+            right: "max(1rem, env(safe-area-inset-right))",
+            zIndex: 1000,
+          }}
+        >
+          <GitHubLoginButton />
+        </Box>
+      </Portal>
     </>
   );
 }
