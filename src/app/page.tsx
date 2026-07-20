@@ -42,7 +42,7 @@ export default function Home() {
     {
       title: "Lyrics Embedder",
       description:
-        "Embed synchronized and unsynchronized lyrics (.lrc/.txt) into audio files.",
+        "Add lyrics directly to music files. Supports scrolling lyrics (.lrc) and static text lyrics (.txt).",
       icon: Music,
       color: "pink",
       href: "/lyrics-embedder",

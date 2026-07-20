@@ -548,8 +548,9 @@ export function LyricsEmbedderCore() {
                 Lyrics Audio Embedder
               </Text>
               <Text size="sm" c="dimmed">
-                Embed synchronized (.lrc) or unsynchronized (.txt) lyrics into
-                audio metadata
+                Insert lyrics directly into your song files. Use a .lrc file for
+                lyrics that scroll automatically as the song plays, or a .txt
+                file for standard static text.
               </Text>
             </div>
           </Group>

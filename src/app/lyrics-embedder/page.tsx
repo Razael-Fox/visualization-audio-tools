@@ -19,9 +19,9 @@ export default function LyricsEmbedderPage() {
         Lyrics Audio Embedder
       </Title>
       <Text c="dimmed" mb="xl">
-        Upload an audio file (.mp3) along with lyrics to embed them directly
-        into the ID3 tags. You can also sync plain lyrics line-by-line using our
-        interactive tap-sync utility.
+        Add lyrics directly inside your music files (.mp3). You can upload a
+        .lrc file for scrolling karaoke-style lyrics, a .txt file for standard
+        static text, or use our interactive tool to sync them manually.
       </Text>
 
       <div className="mt-8">
