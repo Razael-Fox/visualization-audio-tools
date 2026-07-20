@@ -19,12 +19,28 @@ import { useEffect } from "react";
 import { Activity, FileAudio, Mic, Home } from "lucide-react";
 import { GitHubLoginButton } from "@/components/Auth/GitHubLoginButton";
 import { SiteBanner } from "@/components/SiteBanner/SiteBanner";
+import { VantFloating } from "@/components/VantFloating";
 
 const links = [
   { link: "/", label: "Home", icon: Home, color: "blue" },
-  { link: "/visualizer", label: "Audio Visualizer", icon: Activity, color: "violet" },
-  { link: "/speech-to-text", label: "Speech to Text", icon: Mic, color: "teal" },
-  { link: "/metadata", label: "Extract Metadata", icon: FileAudio, color: "orange" },
+  {
+    link: "/visualizer",
+    label: "Audio Visualizer",
+    icon: Activity,
+    color: "violet",
+  },
+  {
+    link: "/speech-to-text",
+    label: "Speech to Text",
+    icon: Mic,
+    color: "teal",
+  },
+  {
+    link: "/metadata",
+    label: "Extract Metadata",
+    icon: FileAudio,
+    color: "orange",
+  },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -110,6 +126,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </AppShellMain>
       </AppShell>
 
+      <VantFloating navMenuVisible={opened} />
+
       {/* Floating Buttons for Mobile */}
       <Portal>
         <Box
@@ -157,4 +175,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </>
   );
 }
-
