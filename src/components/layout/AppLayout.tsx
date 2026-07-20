@@ -125,8 +125,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </AppShellNavbar>
 
         <AppShellMain>
-          <SiteBanner />
-          {children}
+          <Box pt={{ base: "4.5rem", sm: 0 }}>
+            <SiteBanner />
+            {children}
+          </Box>
         </AppShellMain>
       </AppShell>
 
