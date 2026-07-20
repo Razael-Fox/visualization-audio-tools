@@ -71,7 +71,7 @@ export function SpeechToTextCore() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setAiInsight(data.insight);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setAiInsight("Failed to generate AI correction.");
     } finally {
@@ -125,7 +125,7 @@ export function SpeechToTextCore() {
       }
 
       setTranscription(data.text);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError(err.message || "An error occurred during transcription");
     } finally {
@@ -319,9 +319,55 @@ export function SpeechToTextCore() {
 
                 <Collapse expanded={aiLoading || !!aiInsight}>
                   <Stack gap="xs" mt="sm">
-                    <Text fw={500} size="sm" c="dimmed">
-                      AI Correction & Summary:
-                    </Text>
+                    <Group justify="space-between" align="center">
+                      <Text fw={500} size="sm" c="dimmed">
+                        AI Correction & Summary:
+                      </Text>
+                      {aiInsight && !aiLoading && (
+                        <Group gap="xs">
+                          <CopyButton value={aiInsight} timeout={2000}>
+                            {({ copied, copy }) => (
+                              <Tooltip
+                                label={copied ? "Copied" : "Copy"}
+                                withArrow
+                                position="right"
+                              >
+                                <ActionIcon
+                                  color={copied ? "stt" : "gray"}
+                                  variant="subtle"
+                                  onClick={copy}
+                                >
+                                  {copied ? (
+                                    <Check size={16} />
+                                  ) : (
+                                    <Copy size={16} />
+                                  )}
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                          </CopyButton>
+                          <Tooltip label="Download as .txt" withArrow>
+                            <ActionIcon
+                              color="stt"
+                              variant="subtle"
+                              onClick={() => {
+                                const blob = new Blob([aiInsight], { type: "text/plain" });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = `ai-summary-${file?.name || "audio"}.txt`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                              }}
+                            >
+                              <Download size={16} />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Group>
+                      )}
+                    </Group>
                     {aiLoading ? (
                       <Group
                         justify="center"

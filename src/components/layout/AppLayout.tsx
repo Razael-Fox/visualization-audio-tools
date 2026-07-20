@@ -107,7 +107,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 style={
                   item.link === pathname
                     ? {
-                        backgroundColor: `var(--mantine-color-${item.color}-light)`,
+                        backgroundColor: `color-mix(in srgb, var(--mantine-color-${item.color}-light-color) 20%, transparent)`,
                         color: `var(--mantine-color-${item.color}-light-color)`,
                         fontWeight: 500,
                       }

@@ -43,7 +43,7 @@ export default function Home() {
 
   return (
     <Container size="lg" py="xl" component="main">
-      <div className="flex flex-col items-center text-center max-w-[800px] mx-auto py-16">
+      <div className="flex flex-col items-center text-center max-w-[800px] mx-auto pt-28 pb-16">
         <Title
           order={1}
           className="text-4xl md:text-6xl font-bold tracking-tight mb-4"
@@ -113,7 +113,8 @@ export default function Home() {
                   href={feature.href}
                   variant="subtle"
                   color={feature.color}
-                  px={0}
+                  px="md"
+                  ml="-md"
                 >
                   Open Tool →
                 </Button>

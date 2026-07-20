@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       text: transcription.text,
       details: transcription,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Transcription error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to transcribe audio" },

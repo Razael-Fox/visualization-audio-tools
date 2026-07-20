@@ -1,6 +1,25 @@
-import { createTheme } from "@mantine/core";
+import {
+  createTheme,
+  defaultVariantColorsResolver,
+  VariantColorsResolver,
+} from "@mantine/core";
+
+const variantColorResolver: VariantColorsResolver = (input) => {
+  const defaultResolvedColors = defaultVariantColorsResolver(input);
+
+  if (input.variant === "light") {
+    return {
+      ...defaultResolvedColors,
+      background: `color-mix(in srgb, ${defaultResolvedColors.color} 20%, transparent)`,
+      hover: `color-mix(in srgb, ${defaultResolvedColors.color} 30%, transparent)`,
+    };
+  }
+
+  return defaultResolvedColors;
+};
 
 const theme = createTheme({
+  variantColorResolver,
   breakpoints: {
     xs: "36em",
     sm: "48em",
