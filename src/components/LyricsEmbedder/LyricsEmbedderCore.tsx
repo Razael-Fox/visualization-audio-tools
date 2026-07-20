@@ -22,6 +22,7 @@ import {
   ScrollArea,
   Divider,
   Title,
+  Loader,
 } from "@mantine/core";
 import {
   Play,
@@ -166,6 +167,8 @@ export function LyricsEmbedderCore() {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
   const [aiSyncLoading, setAiSyncLoading] = useState(false);
+  const [aiSyncError, setAiSyncError] = useState<string | null>(null);
+  const [aiSyncSuccess, setAiSyncSuccess] = useState<boolean>(false);
 
   const {
     canUpload,
@@ -322,17 +325,18 @@ export function LyricsEmbedderCore() {
       .map((line) => line.replace(/\[\d+:\d+(?:\.\d+)?\]/g, "").trim())
       .filter((line) => line.length > 0);
 
-    if (parsed.length > 0 && lines.length === parsed.length) {
+    if (parsed.length > 0) {
       setSyncLines(
-        lines.map((line, idx) => ({
-          text: line,
-          time: parsed[idx].time,
+        parsed.map((item) => ({
+          text: item.text,
+          time: item.time,
         })),
       );
+      setCurrentSyncIndex(parsed.length);
     } else {
       setSyncLines(lines.map((line) => ({ text: line })));
+      setCurrentSyncIndex(0);
     }
-    setCurrentSyncIndex(0);
   };
 
   // AI-powered auto-sync method using API route
@@ -340,6 +344,8 @@ export function LyricsEmbedderCore() {
     if (!audioFile || !lyricsText.trim()) return;
     setLimitError(null);
     setEmbedError(null);
+    setAiSyncError(null);
+    setAiSyncSuccess(false);
 
     if (!canGenerateAi) {
       setLimitError(
@@ -371,15 +377,18 @@ export function LyricsEmbedderCore() {
       if (data.lrc) {
         // Successfully got synced LRC from AI! Update states
         handleLyricsTextChange(data.lrc);
-        // Switch to the preview tab so they can see it working!
-        setActiveTab("preview");
+        setAiSyncSuccess(true);
+        // Switch to the preview tab after showing success message
+        setTimeout(() => {
+          setActiveTab("preview");
+        }, 2000);
       } else {
         throw new Error("Invalid response from AI");
       }
     } catch (err: unknown) {
       console.error(err);
       const errMsg = err instanceof Error ? err.message : String(err);
-      setEmbedError(`AI Sync Failed: ${errMsg}`);
+      setAiSyncError(errMsg);
     } finally {
       setAiSyncLoading(false);
     }
@@ -813,6 +822,42 @@ export function LyricsEmbedderCore() {
                 <Grid>
                   <Grid.Col span={{ base: 12, md: 8 }}>
                     <Stack gap="md">
+                      {aiSyncLoading && (
+                        <Alert
+                          icon={<Loader size={16} color="pink" />}
+                          title="AI is Syncing Lyrics"
+                          color="pink"
+                          variant="light"
+                        >
+                          Please wait. Gemini AI is listening to the song and
+                          matching it line-by-line with your lyrics... (this may
+                          take 15 to 30 seconds).
+                        </Alert>
+                      )}
+
+                      {aiSyncSuccess && (
+                        <Alert
+                          icon={<CheckCircle size={16} />}
+                          title="Auto-Sync Completed!"
+                          color="green"
+                          variant="light"
+                        >
+                          AI has successfully aligned the lyrics! Redirecting
+                          you to the preview player...
+                        </Alert>
+                      )}
+
+                      {aiSyncError && (
+                        <Alert
+                          icon={<AlertCircle size={16} />}
+                          title="AI Auto-Sync Failed"
+                          color="red"
+                          variant="light"
+                        >
+                          {aiSyncError}
+                        </Alert>
+                      )}
+
                       <div className="flex justify-between items-center bg-gray-50 dark:bg-dark-600 p-3 rounded border border-gray-100 dark:border-dark-500">
                         <div>
                           <Text size="sm" fw={600}>
