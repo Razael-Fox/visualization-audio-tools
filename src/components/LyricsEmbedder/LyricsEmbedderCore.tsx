@@ -395,6 +395,14 @@ export function LyricsEmbedderCore() {
       setCurrentTime(time);
     });
 
+    wavesurfer.current.on("audioprocess", (time) => {
+      setCurrentTime(time);
+    });
+
+    wavesurfer.current.on("seeking", (time) => {
+      setCurrentTime(time);
+    });
+
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
       wavesurfer.current?.destroy();
@@ -1320,7 +1328,7 @@ export function LyricsEmbedderCore() {
                               data-lyric-index={idx}
                               fw={fontWeight}
                               size="md"
-                              className={`transition-all duration-700 ease-out transform-gpu will-change-transform w-full max-w-full px-4 sm:px-6 text-center select-none py-1.5 leading-relaxed tracking-wide ${dynamicClasses}`}
+                              className={`transition-all duration-200 ease-out transform-gpu will-change-transform w-full max-w-full px-4 sm:px-6 text-center select-none py-1.5 leading-relaxed tracking-wide ${dynamicClasses}`}
                             >
                               {lyric.text}
                             </Text>
