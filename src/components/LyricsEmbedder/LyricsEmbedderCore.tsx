@@ -226,6 +226,9 @@ export function LyricsEmbedderCore() {
 
   const previewViewportRef = useRef<HTMLDivElement | null>(null);
   const syncContainerRef = useRef<HTMLDivElement | null>(null);
+  const playerSectionRef = useRef<HTMLDivElement | null>(null);
+  const previewCardRef = useRef<HTMLDivElement | null>(null);
+  const stepProgressRef = useRef<HTMLDivElement | null>(null);
 
   // Smooth scroll to active lyric without stutter on mobile
   useEffect(() => {
@@ -439,11 +442,11 @@ export function LyricsEmbedderCore() {
   const handleAiSync = async () => {
     if (!audioFile || !lyricsText.trim()) return;
 
-    // Smooth scroll sync section into the center of the viewport
+    // Smooth scroll sync step progress card into view at the top
     setTimeout(() => {
-      syncContainerRef.current?.scrollIntoView({
+      stepProgressRef.current?.scrollIntoView({
         behavior: "smooth",
-        block: "center",
+        block: "start",
       });
     }, 50);
 
@@ -669,7 +672,29 @@ export function LyricsEmbedderCore() {
     setLyricsText(generateLRC(syncedItems));
   };
 
-  const togglePlay = () => wavesurfer.current?.playPause();
+  const togglePlay = () => {
+    wavesurfer.current?.playPause();
+    // Auto scroll to Live LRC Preview card when play is pressed
+    setTimeout(() => {
+      previewCardRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
+  };
+
+  const handleTabChange = (val: string) => {
+    setActiveTab(val);
+    if (val === "preview") {
+      // Auto scroll up to waveform player (play button area) when entering preview tab
+      setTimeout(() => {
+        playerSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 50);
+    }
+  };
   const stopAudio = () => {
     wavesurfer.current?.stop();
     setIsPlaying(false);
@@ -828,7 +853,10 @@ export function LyricsEmbedderCore() {
         <Collapse expanded={!!audioFileName}>
           <Stack gap="md" mt="xs">
             {/* Waveform Player */}
-            <div className="relative w-full rounded-md border border-gray-200 dark:border-dark-500 overflow-hidden bg-gray-50 dark:bg-dark-700 p-4">
+            <div
+              ref={playerSectionRef}
+              className="relative w-full rounded-md border border-gray-200 dark:border-dark-500 overflow-hidden bg-gray-50 dark:bg-dark-700 p-4"
+            >
               <Text size="xs" c="dimmed" mb="xs">
                 Loaded track:{" "}
                 <span className="font-semibold text-pink-500">
@@ -902,7 +930,7 @@ export function LyricsEmbedderCore() {
             <Tabs
               variant="unstyled"
               value={activeTab}
-              onChange={(val) => val && setActiveTab(val)}
+              onChange={(val) => val && handleTabChange(val)}
               className="w-full"
             >
               <div className="w-full flex items-center justify-between gap-2 p-1.5 mb-2 bg-gray-900/80 dark:bg-dark-800/80 border border-gray-800/80 rounded-2xl backdrop-blur-xl shadow-inner">
@@ -1042,7 +1070,7 @@ export function LyricsEmbedderCore() {
               </Tabs.Panel>
 
               <Tabs.Panel value="sync" pt="md">
-                <Grid>
+                <Grid ref={stepProgressRef}>
                   <Grid.Col span={{ base: 12, md: 8 }}>
                     <Stack gap="md" ref={syncContainerRef}>
                       {aiSyncLoading && (
@@ -1269,6 +1297,7 @@ export function LyricsEmbedderCore() {
 
               <Tabs.Panel value="preview" pt="md">
                 <Card
+                  ref={previewCardRef}
                   withBorder
                   className="bg-dark-900 text-white min-h-[380px] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden"
                   style={{ minHeight: "380px" }}
