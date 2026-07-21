@@ -14,8 +14,20 @@ import {
   Alert,
   Collapse,
   Skeleton,
+  Menu,
+  ActionIcon,
+  CopyButton,
+  Tooltip,
 } from "@mantine/core";
-import { FileAudio, Upload, AlertCircle } from "lucide-react";
+import {
+  FileAudio,
+  Upload,
+  AlertCircle,
+  Copy,
+  Check,
+  Download,
+  ChevronDown,
+} from "lucide-react";
 import { parseBlob } from "music-metadata";
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
 import { useUsageLimit } from "@/hooks/useUsageLimit";
@@ -31,6 +43,29 @@ interface AudioMetadata {
     format: string;
     data: number[];
   };
+}
+
+function escapeXml(str: string): string {
+  return str.replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case "&":
+        return "&amp;";
+      case "'":
+        return "&apos;";
+      case '"':
+        return "&quot;";
+      default:
+        return c;
+    }
+  });
+}
+
+function escapeToml(str: string): string {
+  return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 export function AudioMetadataCore() {
@@ -122,7 +157,6 @@ export function AudioMetadataCore() {
     const progressInterval = setInterval(() => {
       setLoadProgress((prev) => {
         if (prev >= 90) return prev;
-        // Random increment between 5 and 15
         return prev + Math.floor(Math.random() * 10) + 5;
       });
     }, 50);
@@ -162,6 +196,171 @@ export function AudioMetadataCore() {
     } finally {
       clearInterval(progressInterval);
     }
+  };
+
+  const handleDownload = (formatType: string) => {
+    if (!metadata && !fileName) return;
+
+    const dataMap = {
+      fileName: fileName || "",
+      fileSize: fileSize || "",
+      fileType: fileType || "",
+      title: metadata?.title || "",
+      artist: metadata?.artist || "",
+      album: metadata?.album || "",
+      year: metadata?.year || "",
+      track: metadata?.track || "",
+      genre: metadata?.genre || "",
+    };
+
+    let content = "";
+    const baseFilename = fileName
+      ? fileName.replace(/\.[^/.]+$/, "")
+      : "audio_metadata";
+    let extension = "txt";
+
+    switch (formatType) {
+      case "jsonl":
+        content = JSON.stringify(dataMap) + "\n";
+        extension = "jsonl";
+        break;
+
+      case "json":
+        content = JSON.stringify(dataMap, null, 2);
+        extension = "json";
+        break;
+
+      case "xml":
+        content =
+          `<?xml version="1.0" encoding="UTF-8"?>\n<audioMetadata>\n` +
+          Object.entries(dataMap)
+            .map(([k, v]) => `  <${k}>${escapeXml(v)}</${k}>`)
+            .join("\n") +
+          `\n</audioMetadata>\n`;
+        extension = "xml";
+        break;
+
+      case "toml":
+        content =
+          `[metadata]\n` +
+          Object.entries(dataMap)
+            .map(([k, v]) => `${k} = "${escapeToml(v)}"`)
+            .join("\n") +
+          `\n`;
+        extension = "toml";
+        break;
+
+      case "txt":
+        content = [
+          `+ File Name: ${dataMap.fileName}`,
+          `+ File Size: ${dataMap.fileSize}`,
+          `+ File Type: ${dataMap.fileType}`,
+          `+ Title: ${dataMap.title}`,
+          `+ Artist: ${dataMap.artist}`,
+          `+ Album: ${dataMap.album}`,
+          `+ Year: ${dataMap.year}`,
+          `+ Track: ${dataMap.track}`,
+          `+ Genre: ${dataMap.genre}`,
+        ].join("\n");
+        extension = "txt";
+        break;
+
+      case "markdown":
+        content =
+          `# Audio Metadata\n\n` +
+          [
+            `- **File Name:** ${dataMap.fileName}`,
+            `- **File Size:** ${dataMap.fileSize}`,
+            `- **File Type:** ${dataMap.fileType}`,
+            `- **Title:** ${dataMap.title}`,
+            `- **Artist:** ${dataMap.artist}`,
+            `- **Album:** ${dataMap.album}`,
+            `- **Year:** ${dataMap.year}`,
+            `- **Track:** ${dataMap.track}`,
+            `- **Genre:** ${dataMap.genre}`,
+          ].join("\n") +
+          `\n`;
+        extension = "md";
+        break;
+
+      case "js-var":
+        content = `const audioMetadata = ${JSON.stringify(dataMap, null, 2)};\n`;
+        extension = "js";
+        break;
+
+      case "js-array":
+        const arr = Object.entries(dataMap).map(([key, value]) => ({
+          key,
+          value,
+        }));
+        content = `const audioMetadataArray = ${JSON.stringify(arr, null, 2)};\n`;
+        extension = "js";
+        break;
+    }
+
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${baseFilename}_metadata.${extension}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const renderFieldRow = (
+    label: string,
+    val: string | undefined | null,
+    isBadge = false,
+  ) => {
+    const displayVal = val || "—";
+    const canCopy = !!val && val !== "—";
+
+    return (
+      <>
+        <Grid.Col span={4}>
+          <Text size="sm" c="dimmed">
+            {label}:
+          </Text>
+        </Grid.Col>
+        <Grid.Col span={8}>
+          <Group gap="xs" align="center" wrap="nowrap">
+            {isBadge && val ? (
+              <Badge color="metadata" variant="light">
+                {val}
+              </Badge>
+            ) : (
+              <Text size="sm" fw={500} style={{ wordBreak: "break-word" }}>
+                {displayVal}
+              </Text>
+            )}
+
+            {canCopy && (
+              <CopyButton value={val}>
+                {({ copied, copy }) => (
+                  <Tooltip
+                    label={copied ? "Copied" : "Copy"}
+                    withArrow
+                    position="top"
+                  >
+                    <ActionIcon
+                      color={copied ? "teal" : "gray"}
+                      variant="subtle"
+                      size="xs"
+                      onClick={copy}
+                      aria-label={`Copy ${label}`}
+                    >
+                      {copied ? <Check size={14} /> : <Copy size={14} />}
+                    </ActionIcon>
+                  </Tooltip>
+                )}
+              </CopyButton>
+            )}
+          </Group>
+        </Grid.Col>
+      </>
+    );
   };
 
   // Create Object URL for image data
@@ -217,12 +416,14 @@ export function AudioMetadataCore() {
                 {...props}
                 leftSection={!loading && <Upload size={16} />}
                 variant={loading ? "filled" : "light"}
-                color={loading ? "dark" : "metadata"}
+                color="metadata"
                 disabled={loading}
                 style={{
                   position: "relative",
                   overflow: "hidden",
-                  transition: "background-color 0.3s ease",
+                  transition:
+                    "background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease",
+                  color: loading ? "#ffffff" : undefined,
                 }}
               >
                 {loading && (
@@ -234,12 +435,21 @@ export function AudioMetadataCore() {
                       height: "100%",
                       width: `${loadProgress}%`,
                       backgroundColor: "var(--mantine-color-metadata-filled)",
-                      transition: "width 0.1s ease-out",
+                      transition: "width 0.15s ease-out, opacity 0.3s ease",
+                      opacity: loading ? 1 : 0,
                       zIndex: 0,
                     }}
                   />
                 )}
-                <span style={{ position: "relative", zIndex: 1 }}>
+                <span
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    color: loading ? "#ffffff" : undefined,
+                    transition: "color 0.3s ease",
+                    fontWeight: 600,
+                  }}
+                >
                   {loading
                     ? `Processing... ${loadProgress}%`
                     : "Select Audio File"}
@@ -312,117 +522,66 @@ export function AudioMetadataCore() {
 
                 <Grid.Col span={{ base: 12, md: 8 }}>
                   <Stack gap="md">
-                    <Text
-                      fw={600}
-                      size="lg"
+                    <Group
+                      justify="space-between"
+                      align="center"
                       className="border-b border-gray-200 dark:border-dark-500 pb-2"
                     >
-                      ID3 Tags & Information
-                    </Text>
+                      <Text fw={600} size="lg">
+                        ID3 Tags & Information
+                      </Text>
+                      <Menu shadow="md" width={200} position="bottom-end">
+                        <Menu.Target>
+                          <Button
+                            variant="light"
+                            color="metadata"
+                            size="xs"
+                            leftSection={<Download size={14} />}
+                            rightSection={<ChevronDown size={14} />}
+                          >
+                            Download
+                          </Button>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                          <Menu.Label>Export Format</Menu.Label>
+                          <Menu.Item onClick={() => handleDownload("jsonl")}>
+                            JSONL (.jsonl)
+                          </Menu.Item>
+                          <Menu.Item onClick={() => handleDownload("json")}>
+                            JSON (.json)
+                          </Menu.Item>
+                          <Menu.Item onClick={() => handleDownload("xml")}>
+                            XML (.xml)
+                          </Menu.Item>
+                          <Menu.Item onClick={() => handleDownload("toml")}>
+                            TOML (.toml)
+                          </Menu.Item>
+                          <Menu.Item onClick={() => handleDownload("txt")}>
+                            TXT (.txt)
+                          </Menu.Item>
+                          <Menu.Item onClick={() => handleDownload("markdown")}>
+                            MARKDOWN (.md)
+                          </Menu.Item>
+                          <Menu.Item onClick={() => handleDownload("js-var")}>
+                            JAVASCRIPT VARIABLE (.js)
+                          </Menu.Item>
+                          <Menu.Item onClick={() => handleDownload("js-array")}>
+                            ARRAY (.js)
+                          </Menu.Item>
+                        </Menu.Dropdown>
+                      </Menu>
+                    </Group>
 
-                    <Grid>
-                      <Grid.Col span={4}>
-                        <Text size="sm" c="dimmed">
-                          File Name:
-                        </Text>
-                      </Grid.Col>
-                      <Grid.Col span={8}>
-                        <Text size="sm" fw={500}>
-                          {fileName}
-                        </Text>
-                      </Grid.Col>
-
-                      <Grid.Col span={4}>
-                        <Text size="sm" c="dimmed">
-                          File Size:
-                        </Text>
-                      </Grid.Col>
-                      <Grid.Col span={8}>
-                        <Text size="sm" fw={500}>
-                          {fileSize}
-                        </Text>
-                      </Grid.Col>
-
-                      <Grid.Col span={4}>
-                        <Text size="sm" c="dimmed">
-                          File Type:
-                        </Text>
-                      </Grid.Col>
-                      <Grid.Col span={8}>
-                        <Badge color="gray" variant="light">
-                          {fileType}
-                        </Badge>
-                      </Grid.Col>
-
-                      <Grid.Col span={4}>
-                        <Text size="sm" c="dimmed">
-                          Title:
-                        </Text>
-                      </Grid.Col>
-                      <Grid.Col span={8}>
-                        <Text size="sm" fw={500}>
-                          {metadata.title || "—"}
-                        </Text>
-                      </Grid.Col>
-
-                      <Grid.Col span={4}>
-                        <Text size="sm" c="dimmed">
-                          Artist:
-                        </Text>
-                      </Grid.Col>
-                      <Grid.Col span={8}>
-                        <Text size="sm" fw={500}>
-                          {metadata.artist || "—"}
-                        </Text>
-                      </Grid.Col>
-
-                      <Grid.Col span={4}>
-                        <Text size="sm" c="dimmed">
-                          Album:
-                        </Text>
-                      </Grid.Col>
-                      <Grid.Col span={8}>
-                        <Text size="sm" fw={500}>
-                          {metadata.album || "—"}
-                        </Text>
-                      </Grid.Col>
-
-                      <Grid.Col span={4}>
-                        <Text size="sm" c="dimmed">
-                          Year:
-                        </Text>
-                      </Grid.Col>
-                      <Grid.Col span={8}>
-                        <Text size="sm" fw={500}>
-                          {metadata.year || "—"}
-                        </Text>
-                      </Grid.Col>
-
-                      <Grid.Col span={4}>
-                        <Text size="sm" c="dimmed">
-                          Track:
-                        </Text>
-                      </Grid.Col>
-                      <Grid.Col span={8}>
-                        <Text size="sm" fw={500}>
-                          {metadata.track || "—"}
-                        </Text>
-                      </Grid.Col>
-
-                      <Grid.Col span={4}>
-                        <Text size="sm" c="dimmed">
-                          Genre:
-                        </Text>
-                      </Grid.Col>
-                      <Grid.Col span={8}>
-                        {metadata.genre ? (
-                          <Badge color="metadata" variant="light">
-                            {metadata.genre}
-                          </Badge>
-                        ) : (
-                          "—"
-                        )}
-                      </Grid.Col>
+                    <Grid align="center" gutter="xs">
+                      {renderFieldRow("File Name", fileName)}
+                      {renderFieldRow("File Size", fileSize)}
+                      {renderFieldRow("File Type", fileType, true)}
+                      {renderFieldRow("Title", metadata.title)}
+                      {renderFieldRow("Artist", metadata.artist)}
+                      {renderFieldRow("Album", metadata.album)}
+                      {renderFieldRow("Year", metadata.year)}
+                      {renderFieldRow("Track", metadata.track)}
+                      {renderFieldRow("Genre", metadata.genre, true)}
                     </Grid>
                   </Stack>
                 </Grid.Col>
@@ -443,3 +602,4 @@ export function AudioMetadataCore() {
     </Card>
   );
 }
+
