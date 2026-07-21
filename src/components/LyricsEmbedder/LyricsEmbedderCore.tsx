@@ -442,9 +442,9 @@ export function LyricsEmbedderCore() {
   const handleAiSync = async () => {
     if (!audioFile || !lyricsText.trim()) return;
 
-    // Smooth scroll sync step progress card into view at the top
+    // Smooth scroll to top of player section so progress step card & sync list are fully in view
     setTimeout(() => {
-      stepProgressRef.current?.scrollIntoView({
+      playerSectionRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
@@ -674,7 +674,7 @@ export function LyricsEmbedderCore() {
 
   const togglePlay = () => {
     wavesurfer.current?.playPause();
-    // Auto scroll to Live LRC Preview card when play is pressed
+    // Auto scroll down to Live LRC Preview card when play is pressed
     setTimeout(() => {
       previewCardRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -690,9 +690,9 @@ export function LyricsEmbedderCore() {
       setTimeout(() => {
         playerSectionRef.current?.scrollIntoView({
           behavior: "smooth",
-          block: "center",
+          block: "start",
         });
-      }, 50);
+      }, 100);
     }
   };
   const stopAudio = () => {
