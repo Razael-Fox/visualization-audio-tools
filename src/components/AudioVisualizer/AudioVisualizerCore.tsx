@@ -16,6 +16,9 @@ import {
   Skeleton,
   useMantineTheme,
   useComputedColorScheme,
+  SegmentedControl,
+  Select,
+  Switch,
 } from "@mantine/core";
 import {
   Play,
@@ -27,6 +30,67 @@ import {
 } from "lucide-react";
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
 import { useUsageLimit } from "@/hooks/useUsageLimit";
+
+interface ThemeColors {
+  color1: string;
+  color2: string;
+  accent: string;
+  linearGrad: CanvasGradient;
+  radialGrad: CanvasGradient;
+}
+
+const getThemeColors = (
+  themeName: string,
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  cx: number,
+  cy: number,
+  radius: number
+): ThemeColors => {
+  let color1 = "#7c3aed";
+  let color2 = "#c084fc";
+  let accent = "#c084fc";
+
+  switch (themeName) {
+    case "cyberpunk":
+      color1 = "#06b6d4"; // cyan
+      color2 = "#ec4899"; // pink
+      accent = "#ec4899"; // pink
+      break;
+    case "sunset":
+      color1 = "#ea580c"; // orange
+      color2 = "#eab308"; // yellow
+      accent = "#eab308"; // yellow
+      break;
+    case "ocean":
+      color1 = "#0284c7"; // sky
+      color2 = "#14b8a6"; // teal
+      accent = "#14b8a6"; // teal
+      break;
+    case "matrix":
+      color1 = "#16a34a"; // green-600
+      color2 = "#22c55e"; // green-500
+      accent = "#22c55e"; // green-500
+      break;
+    case "violet":
+    default:
+      color1 = "#7c3aed"; // violet
+      color2 = "#c084fc"; // purple
+      accent = "#c084fc"; // purple
+      break;
+  }
+
+  const linearGrad = ctx.createLinearGradient(0, height, 0, 0);
+  linearGrad.addColorStop(0, color1);
+  linearGrad.addColorStop(1, color2);
+
+  const radialGrad = ctx.createRadialGradient(cx, cy, radius * 0.2, cx, cy, radius);
+  radialGrad.addColorStop(0, `${color1}33`);
+  radialGrad.addColorStop(1, `${color2}aa`);
+
+  return { color1, color2, accent, linearGrad, radialGrad };
+};
 
 export function AudioVisualizerCore() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -56,6 +120,61 @@ export function AudioVisualizerCore() {
   const [aiLoading, setAiLoading] = useState(false);
   const [limitError, setLimitError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+
+  const [visualizerType, setVisualizerType] = useState<"bar" | "circle-gravity">("bar");
+  const [visualizerTheme, setVisualizerTheme] = useState<string>("violet");
+  const [showParticles, setShowParticles] = useState<boolean>(true);
+  const [sensitivity, setSensitivity] = useState<number>(1.2);
+
+  const visualizerTypeRef = useRef(visualizerType);
+  const visualizerThemeRef = useRef(visualizerTheme);
+  const showParticlesRef = useRef(showParticles);
+  const sensitivityRef = useRef(sensitivity);
+
+  useEffect(() => {
+    visualizerTypeRef.current = visualizerType;
+  }, [visualizerType]);
+
+  useEffect(() => {
+    visualizerThemeRef.current = visualizerTheme;
+  }, [visualizerTheme]);
+
+  useEffect(() => {
+    showParticlesRef.current = showParticles;
+  }, [showParticles]);
+
+  useEffect(() => {
+    sensitivityRef.current = sensitivity;
+  }, [sensitivity]);
+
+  useEffect(() => {
+    if (!isPlaying && canvasRef.current && isReady) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = "#090d16";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        if (visualizerType === "circle-gravity") {
+          const cx = canvas.width / 2;
+          const cy = canvas.height / 2;
+          const colors = getThemeColors(visualizerTheme, ctx, canvas.width, canvas.height, cx, cy, 45);
+          
+          ctx.save();
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = colors.accent;
+          ctx.fillStyle = "#0c101d";
+          ctx.strokeStyle = colors.color2;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 45, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+  }, [visualizerType, visualizerTheme, isPlaying, isReady]);
 
   const {
     canUpload,
@@ -125,13 +244,42 @@ export function AudioVisualizerCore() {
       barWidth: 2,
       barGap: 1,
       barRadius: 2,
-      height: 150,
+      height: 60,
       normalize: true,
     });
 
     wavesurfer.current.on("ready", () => {
       setIsReady(true);
       setDuration(wavesurfer.current?.getDuration() || 0);
+
+      // Pre-render idle state on canvas
+      setTimeout(() => {
+        if (canvasRef.current) {
+          const ctx = canvasRef.current.getContext("2d");
+          if (ctx) {
+            ctx.fillStyle = "#090d16";
+            ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+            
+            if (visualizerTypeRef.current === "circle-gravity") {
+              const cx = canvasRef.current.width / 2;
+              const cy = canvasRef.current.height / 2;
+              const colors = getThemeColors(visualizerThemeRef.current, ctx, canvasRef.current.width, canvasRef.current.height, cx, cy, 45);
+              
+              ctx.save();
+              ctx.shadowBlur = 15;
+              ctx.shadowColor = colors.accent;
+              ctx.fillStyle = "#0c101d";
+              ctx.strokeStyle = colors.color2;
+              ctx.lineWidth = 4;
+              ctx.beginPath();
+              ctx.arc(cx, cy, 45, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+              ctx.restore();
+            }
+          }
+        }
+      }, 50);
 
       if (!audioCtxRef.current) {
         try {
@@ -187,6 +335,7 @@ export function AudioVisualizerCore() {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
       wavesurfer.current?.destroy();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const drawSpectrum = () => {
@@ -200,25 +349,183 @@ export function AudioVisualizerCore() {
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
+    interface Particle {
+      x: number;
+      y: number;
+      angle: number;
+      speed: number;
+      size: number;
+      alpha: number;
+      color: string;
+    }
+    const particles: Particle[] = [];
+
     const draw = () => {
       requestRef.current = requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Clear background
+      ctx.fillStyle = "#090d16";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const barWidth = (canvas.width / bufferLength) * 2.5;
-      let barHeight;
-      let x = 0;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
 
-      const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
-      gradient.addColorStop(0, "#4a90e2");
-      gradient.addColorStop(1, "#ae4bec");
+      // Extract settings
+      const type = visualizerTypeRef.current;
+      const themeName = visualizerThemeRef.current;
+      const sens = sensitivityRef.current;
+      const particlesEnabled = showParticlesRef.current;
 
-      for (let i = 0; i < bufferLength; i++) {
-        barHeight = dataArray[i] / 1.5;
-        ctx.fillStyle = gradient;
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-        x += barWidth + 1;
+      // Get theme-specific colors
+      const colors = getThemeColors(themeName, ctx, canvas.width, canvas.height, cx, cy, 60);
+
+      if (type === "bar") {
+        // Draw Bar Spectrum (Linear)
+        const barWidth = (canvas.width / bufferLength) * 2.0;
+        let barHeight;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          barHeight = (dataArray[i] / 255) * canvas.height * 0.8 * sens;
+          ctx.fillStyle = colors.linearGrad;
+          
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(x, canvas.height - barHeight, barWidth - 1, barHeight, [2, 2, 0, 0]);
+            ctx.fill();
+          } else {
+            ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
+          }
+          x += barWidth;
+        }
+      } else if (type === "circle-gravity") {
+        // Draw NCS Gravity Circle
+        let bassSum = 0;
+        const bassBinCount = 8;
+        for (let i = 0; i < bassBinCount; i++) {
+          bassSum += dataArray[i];
+        }
+        const bassAverage = bassSum / bassBinCount;
+        const bassNormalized = bassAverage / 255;
+        const bassIntensity = bassNormalized * sens;
+
+        const baseRadius = 45;
+        const radius = baseRadius + (bassIntensity * 15);
+
+        // Draw Floating Particles
+        if (particlesEnabled) {
+          if (particles.length === 0) {
+            for (let i = 0; i < 60; i++) {
+              const spawnAngle = Math.random() * Math.PI * 2;
+              particles.push({
+                x: cx + Math.cos(spawnAngle) * radius,
+                y: cy + Math.sin(spawnAngle) * radius,
+                angle: spawnAngle,
+                speed: 0.5 + Math.random() * 1.5,
+                size: 1 + Math.random() * 3,
+                alpha: 0.2 + Math.random() * 0.8,
+                color: colors.accent,
+              });
+            }
+          }
+
+          particles.forEach((p) => {
+            const speed = p.speed * (1 + bassIntensity * 3.5);
+            p.x += Math.cos(p.angle) * speed;
+            p.y += Math.sin(p.angle) * speed;
+
+            const dx = p.x - cx;
+            const dy = p.y - cy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            const maxDist = Math.min(canvas.width, canvas.height);
+            p.alpha = Math.max(0, 1 - (dist / (maxDist * 0.6)));
+
+            if (dist > maxDist * 0.6 || p.alpha <= 0) {
+              const spawnAngle = Math.random() * Math.PI * 2;
+              p.x = cx + Math.cos(spawnAngle) * radius;
+              p.y = cy + Math.sin(spawnAngle) * radius;
+              p.angle = spawnAngle + (Math.random() - 0.5) * 0.3;
+              p.alpha = 0.5 + Math.random() * 0.5;
+              p.size = 1 + Math.random() * 3;
+              p.speed = 0.5 + Math.random() * 1.5;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = colors.accent;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          });
+        }
+
+        // Draw Radiating Symmetrical Bars
+        const numBars = 120;
+        ctx.save();
+        ctx.lineWidth = 2.5;
+        
+        for (let i = 0; i < numBars; i++) {
+          const angle = (i / numBars) * Math.PI * 2;
+          const halfIndex = i < numBars / 2 ? i : numBars - 1 - i;
+          const dataIndex = Math.floor((halfIndex / (numBars / 2)) * (bufferLength * 0.65));
+          const value = dataArray[dataIndex] || 0;
+          
+          const barHeight = (value / 255) * 50 * sens;
+          
+          const startX = cx + Math.cos(angle) * radius;
+          const startY = cy + Math.sin(angle) * radius;
+          const endX = cx + Math.cos(angle) * (radius + barHeight);
+          const endY = cy + Math.sin(angle) * (radius + barHeight);
+
+          const barGrad = ctx.createLinearGradient(startX, startY, endX, endY);
+          barGrad.addColorStop(0, colors.color1);
+          barGrad.addColorStop(1, colors.color2);
+          
+          ctx.strokeStyle = barGrad;
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(endX, endY);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Center Circle
+        ctx.save();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = colors.accent;
+        ctx.fillStyle = "#0c101d";
+        ctx.strokeStyle = colors.color2;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // 3D Inner radial gradient
+        ctx.save();
+        const innerRadius = radius * 0.85;
+        const circleGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, innerRadius);
+        circleGrad.addColorStop(0, "#111827");
+        circleGrad.addColorStop(0.7, "#0f172a");
+        circleGrad.addColorStop(1, `${colors.color1}44`);
+        ctx.fillStyle = circleGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, innerRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Central pulse core
+        ctx.save();
+        ctx.fillStyle = colors.accent;
+        ctx.globalAlpha = 0.15 + (bassIntensity * 0.4);
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 0.35 + (bassIntensity * 10), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
     };
 
@@ -262,6 +569,32 @@ export function AudioVisualizerCore() {
   const stopAudio = () => {
     wavesurfer.current?.stop();
     setIsPlaying(false);
+
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = "#090d16";
+        ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        
+        if (visualizerType === "circle-gravity") {
+          const cx = canvasRef.current.width / 2;
+          const cy = canvasRef.current.height / 2;
+          const colors = getThemeColors(visualizerTheme, ctx, canvasRef.current.width, canvasRef.current.height, cx, cy, 45);
+          
+          ctx.save();
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = colors.accent;
+          ctx.fillStyle = "#0c101d";
+          ctx.strokeStyle = colors.color2;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 45, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
   };
 
   const handleVolumeChange = (value: number) => {
@@ -328,22 +661,27 @@ export function AudioVisualizerCore() {
               </span>
             </Text>
 
-            <div className="relative w-full rounded-md border border-gray-200 dark:border-dark-500 overflow-hidden bg-gray-50 dark:bg-dark-700">
-              {!isReady && <Skeleton height={150} radius="md" animate />}
+            <Stack gap="md">
+              {/* Visualizer Display Panel */}
+              <div className="relative w-full rounded-md border border-gray-200 dark:border-dark-500 overflow-hidden bg-[#090d16] flex items-center justify-center">
+                {!isReady && <Skeleton height={250} radius="md" animate />}
+                <canvas
+                  ref={canvasRef}
+                  width={800}
+                  height={250}
+                  className={`w-full h-[250px] block transition-opacity duration-300 ${!isReady ? "hidden" : ""}`}
+                />
+              </div>
 
-              <canvas
-                ref={canvasRef}
-                width={800}
-                height={150}
-                className={`absolute inset-0 w-full h-full opacity-40 pointer-events-none transition-opacity duration-300 ${!isReady ? "hidden" : ""}`}
-                style={{ zIndex: 0 }}
-              />
-
-              <div
-                ref={containerRef}
-                className={`w-full min-h-[150px] relative z-10 ${!isReady ? "hidden" : ""}`}
-              />
-            </div>
+              {/* Seeker / Waveform Timeline */}
+              <div className="relative w-full rounded-md border border-gray-200 dark:border-dark-500 overflow-hidden bg-gray-50 dark:bg-dark-700 p-2">
+                {!isReady && <Skeleton height={60} radius="md" animate />}
+                <div
+                  ref={containerRef}
+                  className={`w-full min-h-[60px] relative z-10 ${!isReady ? "hidden" : ""}`}
+                />
+              </div>
+            </Stack>
 
             {isReady && (
               <Group justify="space-between" mt="-xs">
@@ -355,6 +693,67 @@ export function AudioVisualizerCore() {
                 </Text>
               </Group>
             )}
+
+            {/* Visualizer Settings Panel */}
+            <Card withBorder radius="md" p="md" bg="var(--mantine-color-body)">
+              <Stack gap="sm">
+                <Text fw={600} size="sm">Visualizer Settings</Text>
+                <Group grow align="flex-end" style={{ gap: "1rem" }}>
+                  <Stack gap="xs">
+                    <Text size="xs" fw={500}>Type</Text>
+                    <SegmentedControl
+                      value={visualizerType}
+                      onChange={(value) => setVisualizerType(value as "bar" | "circle-gravity")}
+                      data={[
+                        { label: "Bar Spectrum", value: "bar" },
+                        { label: "NCS Gravity Circle", value: "circle-gravity" },
+                      ]}
+                      size="xs"
+                    />
+                  </Stack>
+
+                  <Stack gap="xs">
+                    <Text size="xs" fw={500}>Theme</Text>
+                    <Select
+                      value={visualizerTheme}
+                      onChange={(value) => setVisualizerTheme(value || "violet")}
+                      data={[
+                        { label: "Violet Neon", value: "violet" },
+                        { label: "NCS Cyberpunk", value: "cyberpunk" },
+                        { label: "Sunset Glow", value: "sunset" },
+                        { label: "Ocean Wave", value: "ocean" },
+                        { label: "Matrix Green", value: "matrix" },
+                      ]}
+                      size="xs"
+                    />
+                  </Stack>
+                </Group>
+
+                <Group gap="xl" mt="xs" align="center">
+                  <Stack gap="xs" style={{ flex: 1 }}>
+                    <Text size="xs" fw={500}>Sensitivity: {sensitivity}x</Text>
+                    <Slider
+                      min={0.5}
+                      max={2.5}
+                      step={0.1}
+                      value={sensitivity}
+                      onChange={setSensitivity}
+                      size="sm"
+                    />
+                  </Stack>
+
+                  {visualizerType === "circle-gravity" && (
+                    <Switch
+                      label="Show Particles"
+                      checked={showParticles}
+                      onChange={(event) => setShowParticles(event.currentTarget.checked)}
+                      size="sm"
+                      mt="md"
+                    />
+                  )}
+                </Group>
+              </Stack>
+            </Card>
 
             <Group
               mt="sm"
