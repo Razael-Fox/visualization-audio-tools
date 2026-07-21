@@ -1,1 +1,46 @@
 @import "./theme.css";
+
+@keyframes rotate-rgb {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.rgb-border-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: var(--mantine-radius-md, 8px);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.rgb-border-wrapper::before {
+  content: "";
+  position: absolute;
+  top: -200%;
+  left: -200%;
+  width: 500%;
+  height: 500%;
+  background: conic-gradient(
+    from 0deg,
+    #ff0055,
+    #7a00ff,
+    #00e5ff,
+    #00ff66,
+    #ffcc00,
+    #ff0055
+  );
+  animation: rotate-rgb 4s linear infinite;
+  z-index: 0;
+}
+
+.rgb-border-wrapper > * {
+  position: relative;
+  z-index: 1;
+}

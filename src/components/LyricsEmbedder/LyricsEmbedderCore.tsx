@@ -225,6 +225,7 @@ export function LyricsEmbedderCore() {
   }, [currentTime, syncedLyrics]);
 
   const previewViewportRef = useRef<HTMLDivElement | null>(null);
+  const syncContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Smooth scroll to active lyric without stutter on mobile
   useEffect(() => {
@@ -437,6 +438,15 @@ export function LyricsEmbedderCore() {
   // AI-powered auto-sync method using API route
   const handleAiSync = async () => {
     if (!audioFile || !lyricsText.trim()) return;
+
+    // Smooth scroll sync section into the center of the viewport
+    setTimeout(() => {
+      syncContainerRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 50);
+
     setLimitError(null);
     setEmbedError(null);
     setAiSyncError(null);
@@ -1034,7 +1044,7 @@ export function LyricsEmbedderCore() {
               <Tabs.Panel value="sync" pt="md">
                 <Grid>
                   <Grid.Col span={{ base: 12, md: 8 }}>
-                    <Stack gap="md">
+                    <Stack gap="md" ref={syncContainerRef}>
                       {aiSyncLoading && (
                         <Alert
                           title="AI is Syncing Lyrics"
@@ -1368,30 +1378,32 @@ export function LyricsEmbedderCore() {
                 </Alert>
               )}
 
-              <Group justify="center" gap="md">
+              <Group justify="center" gap="md" wrap="wrap">
                 <Button
                   size="lg"
                   color="pink"
                   onClick={handleEmbedLyrics}
                   loading={embedProgress === "embedding"}
                   disabled={!audioFile || !lyricsText.trim()}
-                  className="px-8"
+                  className="px-4 sm:px-6 w-full sm:w-auto"
                 >
                   Embed Lyrics to Audio
                 </Button>
 
                 {downloadUrl && (
-                  <Button
-                    component="a"
-                    href={downloadUrl}
-                    download={getDownloadName()}
-                    size="lg"
-                    color="teal"
-                    leftSection={<Download size={18} />}
-                    className="px-8 animate-bounce"
-                  >
-                    Download Synced MP3
-                  </Button>
+                  <div className="rgb-border-wrapper w-full sm:w-auto">
+                    <Button
+                      component="a"
+                      href={downloadUrl}
+                      download={getDownloadName()}
+                      size="lg"
+                      color="teal"
+                      leftSection={<Download size={18} />}
+                      className="px-4 sm:px-6 w-full sm:w-auto"
+                    >
+                      Download Synced Audio
+                    </Button>
+                  </div>
                 )}
               </Group>
             </Stack>
