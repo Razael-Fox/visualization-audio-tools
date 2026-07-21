@@ -12,8 +12,9 @@ export default function AudioVisualizerPage() {
         Audio Visualizer
       </Title>
       <Text c="dimmed" mb="xl">
-        Upload an audio file to visualize its waveform and frequency in
-        real-time.
+        Upload any song or audio file to watch its sound waves and musical beats
+        come to life in real-time. Customize the visualizer styles, colors, and get
+        AI-powered acoustic insights of your audio.
       </Text>
 
       <div className="mt-8">
