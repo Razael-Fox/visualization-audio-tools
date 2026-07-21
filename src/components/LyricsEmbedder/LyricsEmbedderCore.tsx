@@ -229,6 +229,8 @@ export function LyricsEmbedderCore() {
   const playerSectionRef = useRef<HTMLDivElement | null>(null);
   const previewCardRef = useRef<HTMLDivElement | null>(null);
   const stepProgressRef = useRef<HTMLDivElement | null>(null);
+  const syncStatusCardRef = useRef<HTMLDivElement | null>(null);
+  const autoSyncPanelRef = useRef<HTMLDivElement | null>(null);
 
   // Smooth scroll to active lyric without stutter on mobile
   useEffect(() => {
@@ -248,6 +250,19 @@ export function LyricsEmbedderCore() {
       }
     }
   }, [activeLyricIndex]);
+
+  // Smooth scroll UP to player section when switching to preview tab
+  useEffect(() => {
+    if (activeTab === "preview") {
+      const timer = setTimeout(() => {
+        playerSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab]);
 
   // Output/Embed state
   const [embedProgress, setEmbedProgress] = useState<
@@ -442,13 +457,13 @@ export function LyricsEmbedderCore() {
   const handleAiSync = async () => {
     if (!audioFile || !lyricsText.trim()) return;
 
-    // Smooth scroll to top of player section so progress step card & sync list are fully in view
+    // Smooth scroll to sync section so How to Sync, list lyrics, and Sync Status are all visible
     setTimeout(() => {
-      playerSectionRef.current?.scrollIntoView({
+      autoSyncPanelRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
-    }, 50);
+    }, 100);
 
     setLimitError(null);
     setEmbedError(null);
@@ -680,20 +695,11 @@ export function LyricsEmbedderCore() {
         behavior: "smooth",
         block: "center",
       });
-    }, 100);
+    }, 150);
   };
 
   const handleTabChange = (val: string) => {
     setActiveTab(val);
-    if (val === "preview") {
-      // Auto scroll up to waveform player (play button area) when entering preview tab
-      setTimeout(() => {
-        playerSectionRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 100);
-    }
   };
   const stopAudio = () => {
     wavesurfer.current?.stop();
@@ -1070,7 +1076,7 @@ export function LyricsEmbedderCore() {
               </Tabs.Panel>
 
               <Tabs.Panel value="sync" pt="md">
-                <Grid ref={stepProgressRef}>
+                <Grid ref={autoSyncPanelRef}>
                   <Grid.Col span={{ base: 12, md: 8 }}>
                     <Stack gap="md" ref={syncContainerRef}>
                       {aiSyncLoading && (
@@ -1236,6 +1242,7 @@ export function LyricsEmbedderCore() {
 
                   <Grid.Col span={{ base: 12, md: 4 }}>
                     <Card
+                      ref={syncStatusCardRef}
                       withBorder
                       h="100%"
                       className="bg-gray-50/50 dark:bg-dark-600/10"
