@@ -728,14 +728,18 @@ export function AudioVisualizerCore() {
             <Card withBorder radius="md" p="md" bg="var(--mantine-color-body)">
               <Stack gap="xs">
                 <Group 
-                  gap="xs" 
+                  justify="space-between" 
                   align="center" 
                   style={{ cursor: "pointer", userSelect: "none" }}
                   onClick={() => setSettingsOpened(!settingsOpened)}
                 >
-                  <Settings size={16} className="text-gray-500" />
-                  <Text fw={600} size="sm">Visualizer Settings</Text>
-                  {settingsOpened ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
+                  <Group gap="xs">
+                    <Settings size={16} className="text-gray-500" />
+                    <Text fw={600} size="sm">Visualizer Settings</Text>
+                  </Group>
+                  <ActionIcon size="md" variant="subtle" color="gray">
+                    {settingsOpened ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  </ActionIcon>
                 </Group>
 
                 <Collapse expanded={settingsOpened}>
