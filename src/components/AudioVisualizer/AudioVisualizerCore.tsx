@@ -734,7 +734,7 @@ export function AudioVisualizerCore() {
                       { label: "NCS Gravity Circle", value: "circle-gravity" },
                     ]}
                     size="xs"
-                    comboboxProps={{ width: "max-content", sameWidth: false }}
+                    comboboxProps={{ width: "max-content" }}
                   />
 
                   <Select
@@ -749,7 +749,7 @@ export function AudioVisualizerCore() {
                       { label: "Matrix Green", value: "matrix" },
                     ]}
                     size="xs"
-                    comboboxProps={{ width: "max-content", sameWidth: false }}
+                    comboboxProps={{ width: "max-content" }}
                   />
                 </Group>
 
