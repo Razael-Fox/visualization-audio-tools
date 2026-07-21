@@ -1069,8 +1069,8 @@ export function LyricsEmbedderCore() {
                               How to Sync:
                             </Text>
                             <Text size="xs" c="dimmed" mt="xs">
-                              Play the music. Press the button below at the
-                              exact moment each highlighted line starts.
+                              Play the music. Use Auto-Sync with AI or set
+                              timestamps directly for each line below.
                             </Text>
                           </div>
 
@@ -1101,28 +1101,6 @@ export function LyricsEmbedderCore() {
                           </Stack>
                         </Stack>
                       </div>
-
-                      {/* Main Sync Button */}
-                      <Button
-                        size="xl"
-                        color="pink"
-                        variant="gradient"
-                        gradient={{ from: "pink", to: "grape" }}
-                        disabled={currentSyncIndex >= syncLines.length}
-                        onClick={handleTapSync}
-                        className="w-full h-24 text-lg font-bold"
-                      >
-                        {currentSyncIndex < syncLines.length ? (
-                          <div className="flex flex-col items-center">
-                            <span>Tap to Sync Highlighted Line</span>
-                            <span className="text-xs font-normal opacity-80 mt-1">
-                              &quot;{syncLines[currentSyncIndex].text}&quot;
-                            </span>
-                          </div>
-                        ) : (
-                          "All Lines Synced!"
-                        )}
-                      </Button>
 
                       {/* Lines view */}
                       <ScrollArea h={300} offsetScrollbars>
