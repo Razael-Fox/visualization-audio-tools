@@ -583,16 +583,16 @@ export function AudioMetadataCore() {
                     {showMobileGuide && (
                       <Alert
                         icon={<Smartphone size={16} />}
-                        title="Petunjuk Salin Metadata"
+                        title="How to Copy Metadata"
                         color="blue"
                         variant="light"
                         withCloseButton
                         onClose={() => setShowMobileGuide(false)}
                       >
                         <Text size="xs">
-                          <strong>Mobile:</strong> Ketuk/tap langsung pada field metadata untuk menyalin nilainya.
+                          <strong>Mobile:</strong> Tap directly on any metadata field to copy its value.
                           <br />
-                          <strong>Desktop:</strong> Arahkan kursor (hover) pada baris field untuk menampilkan tombol copy.
+                          <strong>Desktop:</strong> Hover over any field row to reveal the copy button.
                         </Text>
                       </Alert>
                     )}

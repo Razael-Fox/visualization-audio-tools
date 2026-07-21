@@ -31,6 +31,7 @@ This document contains rules, guidelines, and context for AI coding agents opera
 
 ## 💻 Coding Standards & Workflow
 
+- **International Target Audience**: Target audience website ini adalah pengguna internasional. Selalu gunakan **Bahasa Inggris** untuk seluruh teks UI, label, tooltip, alert, modal, dan pesan error di dalam aplikasi.
 - **Follow Existing Patterns**: Always analyze existing code structure and formatting before writing new code. Maintain consistency.
 - **Mantine v7 Compatibility**: Pada komponen seperti `<Collapse>`, gunakan prop `expanded={...}` BUKAN `in={...}` untuk menghindari type error.
 - **Error to Skill**: Whenever making a mistake (hallucination, deprecated API usage, wrong assumptions), immediately document it as a new skill in `.agents/skills/<skill-name>/SKILL.md` to prevent future recurrence.
