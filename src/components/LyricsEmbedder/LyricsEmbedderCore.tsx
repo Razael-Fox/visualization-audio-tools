@@ -23,6 +23,7 @@ import {
   Divider,
   Title,
   Loader,
+  Progress,
 } from "@mantine/core";
 import {
   Play,
@@ -38,6 +39,35 @@ import {
   Sparkles,
   Clipboard,
 } from "lucide-react";
+
+// Animated Step Counter component for smooth 0/100 -> 1/100 step increments
+function AnimatedCounter({ value }: { value: number }) {
+  const [displayValue, setDisplayValue] = useState(value);
+
+  useEffect(() => {
+    if (displayValue === value) return;
+
+    const diff = Math.abs(value - displayValue);
+    const stepMs = Math.max(12, Math.min(80, Math.floor(400 / diff)));
+
+    const timer = setInterval(() => {
+      setDisplayValue((prev) => {
+        if (prev < value) return prev + 1;
+        if (prev > value) return prev - 1;
+        clearInterval(timer);
+        return prev;
+      });
+    }, stepMs);
+
+    return () => clearInterval(timer);
+  }, [value, displayValue]);
+
+  return (
+    <span className="inline-block transition-all duration-300 font-mono font-semibold">
+      {displayValue}
+    </span>
+  );
+}
 import { parseBlob } from "music-metadata";
 import { useUsageLimit } from "@/hooks/useUsageLimit";
 
@@ -193,6 +223,27 @@ export function LyricsEmbedderCore() {
     }
     return activeIdx;
   }, [currentTime, syncedLyrics]);
+
+  const previewViewportRef = useRef<HTMLDivElement | null>(null);
+
+  // Smooth scroll to active lyric without stutter on mobile
+  useEffect(() => {
+    if (previewViewportRef.current && activeLyricIndex !== -1) {
+      const activeEl = previewViewportRef.current.querySelector(
+        `[data-lyric-index="${activeLyricIndex}"]`,
+      );
+      if (activeEl) {
+        const top = (activeEl as HTMLElement).offsetTop;
+        previewViewportRef.current.scrollTo({
+          top:
+            top -
+            previewViewportRef.current.clientHeight / 2 +
+            (activeEl as HTMLElement).clientHeight / 2,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [activeLyricIndex]);
 
   // Output/Embed state
   const [embedProgress, setEmbedProgress] = useState<
@@ -978,7 +1029,6 @@ export function LyricsEmbedderCore() {
                     <Stack gap="md">
                       {aiSyncLoading && (
                         <Alert
-                          icon={<Loader size={16} color="pink" />}
                           title="AI is Syncing Lyrics"
                           color="pink"
                           variant="light"
@@ -1173,22 +1223,43 @@ export function LyricsEmbedderCore() {
                       <Stack gap="xs">
                         <Text size="xs">
                           Lines Synced:{" "}
-                          <span className="font-semibold text-pink-500">
-                            {
-                              syncLines.filter((l) => l.time !== undefined)
-                                .length
-                            }{" "}
+                          <span className="font-semibold text-pink-500 font-mono">
+                            <AnimatedCounter
+                              value={
+                                syncLines.filter((l) => l.time !== undefined)
+                                  .length
+                              }
+                            />{" "}
                             / {syncLines.length}
                           </span>
                         </Text>
                         <Text size="xs">
                           Remaining:{" "}
-                          <span className="font-semibold">
-                            {syncLines.length -
-                              syncLines.filter((l) => l.time !== undefined)
-                                .length}
+                          <span className="font-semibold font-mono">
+                            <AnimatedCounter
+                              value={
+                                syncLines.length -
+                                syncLines.filter((l) => l.time !== undefined)
+                                  .length
+                              }
+                            />
                           </span>
                         </Text>
+                        <Progress
+                          value={
+                            syncLines.length > 0
+                              ? (syncLines.filter((l) => l.time !== undefined)
+                                  .length /
+                                  syncLines.length) *
+                                100
+                              : 0
+                          }
+                          color="pink"
+                          size="xs"
+                          radius="xl"
+                          animated
+                          mt="xs"
+                        />
                         <Text size="xs" c="dimmed" mt="xs">
                           Tip: Use spacebar to play/pause the audio. Adjust
                           timestamps dynamically if they are slightly off using
@@ -1203,41 +1274,24 @@ export function LyricsEmbedderCore() {
               <Tabs.Panel value="preview" pt="md">
                 <Card
                   withBorder
-                  className="bg-dark-900 text-white min-h-[250px] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden"
-                  style={{ minHeight: "250px" }}
+                  className="bg-dark-900 text-white min-h-[380px] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden"
+                  style={{ minHeight: "380px" }}
                 >
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-3 left-3 z-10">
                     <Badge color="pink" variant="filled">
                       LRC Live Preview
                     </Badge>
                   </div>
 
                   <ScrollArea
-                    h={260}
-                    viewportRef={(ref) => {
-                      // Auto scroll to active lyric center
-                      if (ref && activeLyricIndex !== -1) {
-                        const activeEl = ref.querySelector(
-                          `[data-lyric-index="${activeLyricIndex}"]`,
-                        );
-                        if (activeEl) {
-                          const top = (activeEl as HTMLElement).offsetTop;
-                          ref.scrollTo({
-                            top:
-                              top -
-                              ref.clientHeight / 2 +
-                              (activeEl as HTMLElement).clientHeight / 2,
-                            behavior: "smooth",
-                          });
-                        }
-                      }
-                    }}
+                    h={340}
+                    viewportRef={previewViewportRef}
                     className="w-full"
                     style={{
                       maskImage:
-                        "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
+                        "linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)",
                       WebkitMaskImage:
-                        "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
+                        "linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)",
                     }}
                   >
                     <Stack gap="md" align="center" py="xl">
@@ -1265,7 +1319,7 @@ export function LyricsEmbedderCore() {
                           } else if (distance === 0) {
                             // Spotify Highlight: 100% visible, bright pink glow
                             dynamicClasses =
-                              "text-pink-400 opacity-100 scale-105 sm:scale-110 blur-none drop-shadow-[0_0_12px_rgba(244,114,182,0.4)]";
+                              "text-pink-400 opacity-100 scale-105 sm:scale-110 blur-none drop-shadow-[0_0_14px_rgba(244,114,182,0.5)]";
                             fontWeight = 800;
                             textSize = "lg";
                           } else if (distance === 1) {
@@ -1294,7 +1348,7 @@ export function LyricsEmbedderCore() {
                               data-lyric-index={idx}
                               fw={fontWeight}
                               size={textSize}
-                              className={`transition-all duration-500 ease-out transform-gpu origin-center max-w-[85%] text-center select-none py-1 ${dynamicClasses}`}
+                              className={`transition-all duration-700 ease-out transform-gpu will-change-transform max-w-[88%] text-center select-none py-1.5 ${dynamicClasses}`}
                             >
                               {lyric.text}
                             </Text>
