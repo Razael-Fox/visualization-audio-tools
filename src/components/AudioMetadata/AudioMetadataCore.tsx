@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Button,
   Card,
@@ -27,6 +27,7 @@ import {
   Check,
   Download,
   ChevronDown,
+  Smartphone,
 } from "lucide-react";
 import { parseBlob } from "music-metadata";
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
@@ -76,10 +77,17 @@ export function AudioMetadataCore() {
   const [fileSize, setFileSize] = useState<string | null>(null);
   const [fileType, setFileType] = useState<string | null>(null);
   const [loadProgress, setLoadProgress] = useState(0);
+  const [showMobileGuide, setShowMobileGuide] = useState(true);
 
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [limitError, setLimitError] = useState<string | null>(null);
+
+  const touchRef = useRef<{ startX: number; startY: number; moved: boolean }>({
+    startX: 0,
+    startY: 0,
+    moved: false,
+  });
 
   const {
     canUpload,
@@ -325,39 +333,89 @@ export function AudioMetadataCore() {
           </Text>
         </Grid.Col>
         <Grid.Col span={8}>
-          <Group gap="xs" align="center" wrap="nowrap">
-            {isBadge && val ? (
-              <Badge color="metadata" variant="light">
-                {val}
-              </Badge>
-            ) : (
-              <Text size="sm" fw={500} style={{ wordBreak: "break-word" }}>
+          {canCopy ? (
+            <CopyButton value={val}>
+              {({ copied, copy }) => {
+                const handleTouchStart = (e: React.TouchEvent) => {
+                  if (e.touches.length === 1) {
+                    touchRef.current = {
+                      startX: e.touches[0].clientX,
+                      startY: e.touches[0].clientY,
+                      moved: false,
+                    };
+                  }
+                };
+
+                const handleTouchMove = (e: React.TouchEvent) => {
+                  if (e.touches.length === 1) {
+                    const deltaX = Math.abs(
+                      e.touches[0].clientX - touchRef.current.startX,
+                    );
+                    const deltaY = Math.abs(
+                      e.touches[0].clientY - touchRef.current.startY,
+                    );
+                    // Threshold of 8px to detect scrolling and prevent miss-touch
+                    if (deltaX > 8 || deltaY > 8) {
+                      touchRef.current.moved = true;
+                    }
+                  }
+                };
+
+                const handleTouchEnd = () => {
+                  if (!touchRef.current.moved) {
+                    copy();
+                  }
+                };
+
+                return (
+                  <div
+                    className="group flex items-center justify-between gap-2 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-dark-500/50 cursor-pointer transition-colors duration-150 select-none"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onClick={() => {
+                      if (touchRef.current.moved) return;
+                      copy();
+                    }}
+                  >
+                    <Group gap="xs" align="center" wrap="nowrap" className="min-w-0 flex-1">
+                      {isBadge ? (
+                        <Badge color="metadata" variant="light">
+                          {val}
+                        </Badge>
+                      ) : (
+                        <Text size="sm" fw={500} style={{ wordBreak: "break-word" }}>
+                          {displayVal}
+                        </Text>
+                      )}
+                    </Group>
+
+                    <Tooltip label={copied ? "Copied" : "Copy"} withArrow position="top">
+                      <ActionIcon
+                        color={copied ? "teal" : "gray"}
+                        variant="subtle"
+                        size="xs"
+                        className={
+                          copied
+                            ? "opacity-100"
+                            : "opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-150"
+                        }
+                        aria-label={`Copy ${label}`}
+                      >
+                        {copied ? <Check size={14} /> : <Copy size={14} />}
+                      </ActionIcon>
+                    </Tooltip>
+                  </div>
+                );
+              }}
+            </CopyButton>
+          ) : (
+            <Group gap="xs" align="center" wrap="nowrap" p="1">
+              <Text size="sm" fw={500} c="dimmed">
                 {displayVal}
               </Text>
-            )}
-
-            {canCopy && (
-              <CopyButton value={val}>
-                {({ copied, copy }) => (
-                  <Tooltip
-                    label={copied ? "Copied" : "Copy"}
-                    withArrow
-                    position="top"
-                  >
-                    <ActionIcon
-                      color={copied ? "teal" : "gray"}
-                      variant="subtle"
-                      size="xs"
-                      onClick={copy}
-                      aria-label={`Copy ${label}`}
-                    >
-                      {copied ? <Check size={14} /> : <Copy size={14} />}
-                    </ActionIcon>
-                  </Tooltip>
-                )}
-              </CopyButton>
-            )}
-          </Group>
+            </Group>
+          )}
         </Grid.Col>
       </>
     );
@@ -522,6 +580,23 @@ export function AudioMetadataCore() {
 
                 <Grid.Col span={{ base: 12, md: 8 }}>
                   <Stack gap="md">
+                    {showMobileGuide && (
+                      <Alert
+                        icon={<Smartphone size={16} />}
+                        title="Petunjuk Salin Metadata"
+                        color="blue"
+                        variant="light"
+                        withCloseButton
+                        onClose={() => setShowMobileGuide(false)}
+                      >
+                        <Text size="xs">
+                          <strong>Mobile:</strong> Ketuk/tap langsung pada field metadata untuk menyalin nilainya.
+                          <br />
+                          <strong>Desktop:</strong> Arahkan kursor (hover) pada baris field untuk menampilkan tombol copy.
+                        </Text>
+                      </Alert>
+                    )}
+
                     <Group
                       justify="space-between"
                       align="center"
