@@ -478,15 +478,19 @@ export function AudioVisualizerCore() {
           });
         }
 
-        // Draw Radiating Symmetrical Bars
+        // Draw Radiating Symmetrical Bars (vocals, piano, snare, etc.)
         const numBars = 120;
         ctx.save();
         ctx.lineWidth = 2.5;
         
+        const startBin = bassBinCount;
+        const endBin = Math.floor(bufferLength * 0.85);
+        const binRange = endBin - startBin;
+
         for (let i = 0; i < numBars; i++) {
           const angle = (i / numBars) * Math.PI * 2;
           const halfIndex = i < numBars / 2 ? i : numBars - 1 - i;
-          const dataIndex = Math.floor((halfIndex / (numBars / 2)) * (bufferLength * 0.65));
+          const dataIndex = startBin + Math.floor((halfIndex / (numBars / 2)) * binRange);
           const value = dataArray[dataIndex] || 0;
           
           const barHeight = (value / 255) * 50 * sens;
