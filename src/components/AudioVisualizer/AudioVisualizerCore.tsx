@@ -10,13 +10,11 @@ import {
   Text,
   FileButton,
   ActionIcon,
-  Slider,
   Alert,
   Collapse,
   Skeleton,
   useMantineTheme,
   useComputedColorScheme,
-  SegmentedControl,
   Select,
   Switch,
 } from "@mantine/core";
@@ -722,49 +720,51 @@ export function AudioVisualizerCore() {
             <Card withBorder radius="md" p="md" bg="var(--mantine-color-body)">
               <Stack gap="sm">
                 <Text fw={600} size="sm">Visualizer Settings</Text>
-                <Group grow align="flex-end" style={{ gap: "1rem" }}>
-                  <Stack gap="xs">
-                    <Text size="xs" fw={500}>Type</Text>
-                    <SegmentedControl
-                      value={visualizerType}
-                      onChange={(value) => setVisualizerType(value as "bar" | "circle-gravity")}
-                      data={[
-                        { label: "Bar Spectrum", value: "bar" },
-                        { label: "NCS Gravity Circle", value: "circle-gravity" },
-                      ]}
-                      size="xs"
-                    />
-                  </Stack>
+                <Group grow wrap="wrap" align="flex-end" style={{ gap: "1rem" }}>
+                  <Select
+                    label="Type"
+                    value={visualizerType}
+                    onChange={(value) => setVisualizerType(value as "bar" | "circle-gravity")}
+                    data={[
+                      { label: "Bar Spectrum", value: "bar" },
+                      { label: "NCS Gravity Circle", value: "circle-gravity" },
+                    ]}
+                    size="xs"
+                    comboboxProps={{ width: "max-content", sameWidth: false }}
+                  />
 
-                  <Stack gap="xs">
-                    <Text size="xs" fw={500}>Theme</Text>
-                    <Select
-                      value={visualizerTheme}
-                      onChange={(value) => setVisualizerTheme(value || "violet")}
-                      data={[
-                        { label: "Violet Neon", value: "violet" },
-                        { label: "NCS Cyberpunk", value: "cyberpunk" },
-                        { label: "Sunset Glow", value: "sunset" },
-                        { label: "Ocean Wave", value: "ocean" },
-                        { label: "Matrix Green", value: "matrix" },
-                      ]}
-                      size="xs"
-                    />
-                  </Stack>
+                  <Select
+                    label="Theme"
+                    value={visualizerTheme}
+                    onChange={(value) => setVisualizerTheme(value || "violet")}
+                    data={[
+                      { label: "Violet Neon", value: "violet" },
+                      { label: "NCS Cyberpunk", value: "cyberpunk" },
+                      { label: "Sunset Glow", value: "sunset" },
+                      { label: "Ocean Wave", value: "ocean" },
+                      { label: "Matrix Green", value: "matrix" },
+                    ]}
+                    size="xs"
+                    comboboxProps={{ width: "max-content", sameWidth: false }}
+                  />
                 </Group>
 
-                <Group gap="xl" mt="xs" align="center">
-                  <Stack gap="xs" style={{ flex: 1 }}>
-                    <Text size="xs" fw={500}>Sensitivity: {sensitivity}x</Text>
-                    <Slider
+                <Group gap="xl" mt="xs" align="center" style={{ gap: "1rem", flexWrap: "wrap" }}>
+                  <Group gap="md" wrap="nowrap" style={{ flex: 1, minWidth: "200px" }}>
+                    <Text size="sm" fw={500}>
+                      Sensitivity: {sensitivity}x
+                    </Text>
+                    <input
+                      type="range"
                       min={0.5}
                       max={2.5}
                       step={0.1}
                       value={sensitivity}
-                      onChange={setSensitivity}
-                      size="sm"
+                      onChange={(e) => setSensitivity(parseFloat(e.target.value))}
+                      className="flex-1 h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-violet-500"
+                      style={{ minWidth: "150px" }}
                     />
-                  </Stack>
+                  </Group>
 
                   {visualizerType === "circle-gravity" && (
                     <Switch
@@ -772,7 +772,6 @@ export function AudioVisualizerCore() {
                       checked={showParticles}
                       onChange={(event) => setShowParticles(event.currentTarget.checked)}
                       size="sm"
-                      mt="md"
                     />
                   )}
                 </Group>
