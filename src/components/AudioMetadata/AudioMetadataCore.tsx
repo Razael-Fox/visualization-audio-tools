@@ -572,7 +572,7 @@ export function AudioMetadataCore() {
                       </Menu>
                     </Group>
 
-                    <Grid align="center" gutter="xs">
+                    <Grid align="center" gap="xs">
                       {renderFieldRow("File Name", fileName)}
                       {renderFieldRow("File Size", fileSize)}
                       {renderFieldRow("File Type", fileType, true)}
