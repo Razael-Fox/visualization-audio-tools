@@ -829,31 +829,92 @@ export function LyricsEmbedderCore() {
             </div>
 
             {/* Editing Section */}
+            {/* Editing Section with Mini Desktop Navbar */}
             <Tabs
-              variant="pills"
-              color="pink"
+              variant="unstyled"
               value={activeTab}
               onChange={(val) => val && setActiveTab(val)}
+              className="w-full"
             >
-              <Tabs.List>
-                <Tabs.Tab value="editor" leftSection={<FileText size={14} />}>
-                  Raw Editor
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="sync"
-                  leftSection={<Clock size={14} />}
-                  disabled={!lyricsText.trim()}
-                >
-                  Tap Sync Tool
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="preview"
-                  leftSection={<Sparkles size={14} />}
-                  disabled={syncedLyrics.length === 0}
-                >
-                  Live LRC Player
-                </Tabs.Tab>
-              </Tabs.List>
+              <div className="w-full flex items-center justify-between gap-2 p-1.5 mb-2 bg-gray-900/80 dark:bg-dark-800/80 border border-gray-800/80 rounded-2xl backdrop-blur-xl shadow-inner">
+                <Tabs.List className="flex items-center gap-1.5 w-full overflow-x-auto scrollbar-none py-0.5 px-0.5">
+                  <Tabs.Tab
+                    value="editor"
+                    leftSection={
+                      <FileText
+                        size={13}
+                        className={
+                          activeTab === "editor"
+                            ? "text-white"
+                            : "text-pink-400"
+                        }
+                      />
+                    }
+                    className={`group relative px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer border ${
+                      activeTab === "editor"
+                        ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
+                        : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    Raw Editor
+                    {activeTab === "editor" && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    )}
+                  </Tabs.Tab>
+
+                  <Tabs.Tab
+                    value="sync"
+                    leftSection={
+                      <Clock
+                        size={13}
+                        className={
+                          activeTab === "sync" ? "text-white" : "text-pink-400"
+                        }
+                      />
+                    }
+                    disabled={!lyricsText.trim()}
+                    className={`group relative px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer border ${
+                      activeTab === "sync"
+                        ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
+                        : !lyricsText.trim()
+                          ? "border-transparent opacity-40 cursor-not-allowed text-gray-500"
+                          : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    Tap Sync Tool
+                    {activeTab === "sync" && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    )}
+                  </Tabs.Tab>
+
+                  <Tabs.Tab
+                    value="preview"
+                    leftSection={
+                      <Sparkles
+                        size={13}
+                        className={
+                          activeTab === "preview"
+                            ? "text-white"
+                            : "text-pink-400"
+                        }
+                      />
+                    }
+                    disabled={syncedLyrics.length === 0}
+                    className={`group relative px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer border ${
+                      activeTab === "preview"
+                        ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
+                        : syncedLyrics.length === 0
+                          ? "border-transparent opacity-40 cursor-not-allowed text-gray-500"
+                          : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    Live LRC Player
+                    {activeTab === "preview" && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    )}
+                  </Tabs.Tab>
+                </Tabs.List>
+              </div>
 
               <Tabs.Panel value="editor" pt="md">
                 <Stack gap="xs">
@@ -1152,7 +1213,7 @@ export function LyricsEmbedderCore() {
                   </div>
 
                   <ScrollArea
-                    h={200}
+                    h={260}
                     viewportRef={(ref) => {
                       // Auto scroll to active lyric center
                       if (ref && activeLyricIndex !== -1) {
@@ -1172,6 +1233,12 @@ export function LyricsEmbedderCore() {
                       }
                     }}
                     className="w-full"
+                    style={{
+                      maskImage:
+                        "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
+                      WebkitMaskImage:
+                        "linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)",
+                    }}
                   >
                     <Stack gap="md" align="center" py="xl">
                       {syncedLyrics.length === 0 ? (
@@ -1180,21 +1247,54 @@ export function LyricsEmbedderCore() {
                         </Text>
                       ) : (
                         syncedLyrics.map((lyric, idx) => {
-                          const isActive = idx === activeLyricIndex;
-                          const isPast = idx < activeLyricIndex;
+                          const distance =
+                            activeLyricIndex === -1
+                              ? -1
+                              : Math.abs(idx - activeLyricIndex);
+
+                          let dynamicClasses = "";
+                          let fontWeight = 500;
+                          let textSize: "sm" | "md" | "lg" = "sm";
+
+                          if (distance === -1) {
+                            // Default / no playback
+                            dynamicClasses =
+                              "text-white/70 opacity-60 scale-100 blur-none";
+                            fontWeight = 500;
+                            textSize = "sm";
+                          } else if (distance === 0) {
+                            // Spotify Highlight: 100% visible, bright pink glow
+                            dynamicClasses =
+                              "text-pink-400 opacity-100 scale-105 sm:scale-110 blur-none drop-shadow-[0_0_12px_rgba(244,114,182,0.4)]";
+                            fontWeight = 800;
+                            textSize = "lg";
+                          } else if (distance === 1) {
+                            // Dekat highlight: transparansi sedikit menghilang (~65% opacity)
+                            dynamicClasses =
+                              "text-white/80 opacity-65 scale-100 blur-none";
+                            fontWeight = 600;
+                            textSize = "md";
+                          } else if (distance === 2) {
+                            // Transisi sedang: ~30% opacity, minimal blur
+                            dynamicClasses =
+                              "text-white/50 opacity-30 scale-[0.96] blur-[1px]";
+                            fontWeight = 500;
+                            textSize = "sm";
+                          } else {
+                            // 100% keluar / jauh: 90% hilang (10% opacity) & agak blur
+                            dynamicClasses =
+                              "text-white/40 opacity-10 scale-[0.92] blur-[2px]";
+                            fontWeight = 400;
+                            textSize = "sm";
+                          }
+
                           return (
                             <Text
                               key={idx}
                               data-lyric-index={idx}
-                              fw={isActive ? 800 : 500}
-                              size={isActive ? "lg" : "sm"}
-                              className={`transition-all duration-300 max-w-[80%] ${
-                                isActive
-                                  ? "text-pink-400 scale-105"
-                                  : isPast
-                                    ? "text-white/60"
-                                    : "text-white/30"
-                              }`}
+                              fw={fontWeight}
+                              size={textSize}
+                              className={`transition-all duration-500 ease-out transform-gpu origin-center max-w-[85%] text-center select-none py-1 ${dynamicClasses}`}
                             >
                               {lyric.text}
                             </Text>
