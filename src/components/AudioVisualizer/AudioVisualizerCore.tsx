@@ -25,6 +25,9 @@ import {
   Upload,
   AlertCircle,
   Activity,
+  Settings,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { AIInsightPanel } from "@/components/AIInsightPanel/AIInsightPanel";
 import { useUsageLimit } from "@/hooks/useUsageLimit";
@@ -123,6 +126,7 @@ export function AudioVisualizerCore() {
   const [visualizerTheme, setVisualizerTheme] = useState<string>("violet");
   const [showParticles, setShowParticles] = useState<boolean>(true);
   const [sensitivity, setSensitivity] = useState<number>(1.2);
+  const [settingsOpened, setSettingsOpened] = useState(false);
 
   const visualizerTypeRef = useRef(visualizerType);
   const visualizerThemeRef = useRef(visualizerTheme);
@@ -403,7 +407,7 @@ export function AudioVisualizerCore() {
         let x = 0;
 
         for (let i = 0; i < bufferLength; i++) {
-          barHeight = (dataArray[i] / 255) * canvas.height * 0.8 * sens;
+          barHeight = (dataArray[i] / 255) * canvas.height * sens;
           ctx.fillStyle = colors.linearGrad;
           
           ctx.beginPath();
@@ -722,63 +726,81 @@ export function AudioVisualizerCore() {
 
             {/* Visualizer Settings Panel */}
             <Card withBorder radius="md" p="md" bg="var(--mantine-color-body)">
-              <Stack gap="sm">
-                <Text fw={600} size="sm">Visualizer Settings</Text>
-                <Group grow wrap="wrap" align="flex-end" style={{ gap: "1rem" }}>
-                  <Select
-                    label="Type"
-                    value={visualizerType}
-                    onChange={(value) => setVisualizerType(value as "bar" | "circle-gravity")}
-                    data={[
-                      { label: "Bar Spectrum", value: "bar" },
-                      { label: "NCS Gravity Circle", value: "circle-gravity" },
-                    ]}
-                    size="xs"
-                    comboboxProps={{ width: "max-content" }}
-                  />
-
-                  <Select
-                    label="Theme"
-                    value={visualizerTheme}
-                    onChange={(value) => setVisualizerTheme(value || "violet")}
-                    data={[
-                      { label: "Violet Neon", value: "violet" },
-                      { label: "NCS Cyberpunk", value: "cyberpunk" },
-                      { label: "Sunset Glow", value: "sunset" },
-                      { label: "Ocean Wave", value: "ocean" },
-                      { label: "Matrix Green", value: "matrix" },
-                    ]}
-                    size="xs"
-                    comboboxProps={{ width: "max-content" }}
-                  />
-                </Group>
-
-                <Group gap="xl" mt="xs" align="center" style={{ gap: "1rem", flexWrap: "wrap" }}>
-                  <Group gap="md" wrap="nowrap" style={{ flex: 1, minWidth: "200px" }}>
-                    <Text size="sm" fw={500}>
-                      Sensitivity: {sensitivity}x
-                    </Text>
-                    <input
-                      type="range"
-                      min={0.5}
-                      max={2.5}
-                      step={0.1}
-                      value={sensitivity}
-                      onChange={(e) => setSensitivity(parseFloat(e.target.value))}
-                      className="flex-1 h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-violet-500"
-                      style={{ minWidth: "150px" }}
-                    />
+              <Stack gap="xs">
+                <Group 
+                  justify="space-between" 
+                  align="center" 
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => setSettingsOpened(!settingsOpened)}
+                >
+                  <Group gap="xs">
+                    <Settings size={16} className="text-gray-500" />
+                    <Text fw={600} size="sm">Visualizer Settings</Text>
                   </Group>
-
-                  {visualizerType === "circle-gravity" && (
-                    <Switch
-                      label="Show Particles"
-                      checked={showParticles}
-                      onChange={(event) => setShowParticles(event.currentTarget.checked)}
-                      size="sm"
-                    />
-                  )}
+                  <ActionIcon size="sm" variant="subtle" color="gray" style={{ pointerEvents: "none" }}>
+                    {settingsOpened ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </ActionIcon>
                 </Group>
+
+                <Collapse expanded={settingsOpened}>
+                  <Stack gap="sm" mt="md">
+                    <Group grow wrap="wrap" align="flex-end" style={{ gap: "1rem" }}>
+                      <Select
+                        label="Type"
+                        value={visualizerType}
+                        onChange={(value) => setVisualizerType(value as "bar" | "circle-gravity")}
+                        data={[
+                          { label: "Bar Spectrum", value: "bar" },
+                          { label: "NCS Gravity Circle", value: "circle-gravity" },
+                        ]}
+                        size="xs"
+                        comboboxProps={{ width: "max-content" }}
+                      />
+
+                      <Select
+                        label="Theme"
+                        value={visualizerTheme}
+                        onChange={(value) => setVisualizerTheme(value || "violet")}
+                        data={[
+                          { label: "Violet Neon", value: "violet" },
+                          { label: "NCS Cyberpunk", value: "cyberpunk" },
+                          { label: "Sunset Glow", value: "sunset" },
+                          { label: "Ocean Wave", value: "ocean" },
+                          { label: "Matrix Green", value: "matrix" },
+                        ]}
+                        size="xs"
+                        comboboxProps={{ width: "max-content" }}
+                      />
+                    </Group>
+
+                    <Group gap="xl" mt="xs" align="center" style={{ gap: "1rem", flexWrap: "wrap" }}>
+                      <Group gap="md" wrap="nowrap" style={{ flex: 1, minWidth: "200px" }}>
+                        <Text size="sm" fw={500}>
+                          Sensitivity: {sensitivity}x
+                        </Text>
+                        <input
+                          type="range"
+                          min={0.5}
+                          max={2.5}
+                          step={0.1}
+                          value={sensitivity}
+                          onChange={(e) => setSensitivity(parseFloat(e.target.value))}
+                          className="flex-1 h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-violet-500"
+                          style={{ minWidth: "150px" }}
+                        />
+                      </Group>
+
+                      {visualizerType === "circle-gravity" && (
+                        <Switch
+                          label="Show Particles"
+                          checked={showParticles}
+                          onChange={(event) => setShowParticles(event.currentTarget.checked)}
+                          size="sm"
+                        />
+                      )}
+                    </Group>
+                  </Stack>
+                </Collapse>
               </Stack>
             </Card>
 
