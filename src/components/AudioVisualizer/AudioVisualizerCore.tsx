@@ -150,6 +150,11 @@ export function AudioVisualizerCore() {
   useEffect(() => {
     if (!isPlaying && canvasRef.current && isReady) {
       const canvas = canvasRef.current;
+      
+      // Dynamic resize to prevent stretching/squishing
+      canvas.width = canvas.clientWidth || 800;
+      canvas.height = canvas.clientHeight || 250;
+
       const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.fillStyle = "#090d16";
@@ -255,15 +260,21 @@ export function AudioVisualizerCore() {
       // Pre-render idle state on canvas
       setTimeout(() => {
         if (canvasRef.current) {
-          const ctx = canvasRef.current.getContext("2d");
+          const canvas = canvasRef.current;
+          
+          // Dynamic resize to prevent stretching/squishing
+          canvas.width = canvas.clientWidth || 800;
+          canvas.height = canvas.clientHeight || 250;
+
+          const ctx = canvas.getContext("2d");
           if (ctx) {
             ctx.fillStyle = "#090d16";
-            ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             if (visualizerTypeRef.current === "circle-gravity") {
-              const cx = canvasRef.current.width / 2;
-              const cy = canvasRef.current.height / 2;
-              const colors = getThemeColors(visualizerThemeRef.current, ctx, canvasRef.current.width, canvasRef.current.height, cx, cy, 45);
+              const cx = canvas.width / 2;
+              const cy = canvas.height / 2;
+              const colors = getThemeColors(visualizerThemeRef.current, ctx, canvas.width, canvas.height, cx, cy, 45);
               
               ctx.save();
               ctx.shadowBlur = 15;
@@ -362,6 +373,13 @@ export function AudioVisualizerCore() {
 
     const draw = () => {
       requestRef.current = requestAnimationFrame(draw);
+      
+      // Dynamic resize to prevent stretching/squishing
+      if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+      }
+
       analyser.getByteFrequencyData(dataArray);
 
       // Clear background
@@ -571,15 +589,21 @@ export function AudioVisualizerCore() {
     setIsPlaying(false);
 
     if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext("2d");
+      const canvas = canvasRef.current;
+      
+      // Dynamic resize to prevent stretching/squishing
+      canvas.width = canvas.clientWidth || 800;
+      canvas.height = canvas.clientHeight || 250;
+
+      const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.fillStyle = "#090d16";
-        ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         if (visualizerType === "circle-gravity") {
-          const cx = canvasRef.current.width / 2;
-          const cy = canvasRef.current.height / 2;
-          const colors = getThemeColors(visualizerTheme, ctx, canvasRef.current.width, canvasRef.current.height, cx, cy, 45);
+          const cx = canvas.width / 2;
+          const cy = canvas.height / 2;
+          const colors = getThemeColors(visualizerTheme, ctx, canvas.width, canvas.height, cx, cy, 45);
           
           ctx.save();
           ctx.shadowBlur = 15;
