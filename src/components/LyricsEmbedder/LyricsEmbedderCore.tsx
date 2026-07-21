@@ -1308,38 +1308,32 @@ export function LyricsEmbedderCore() {
 
                           let dynamicClasses = "";
                           let fontWeight = 500;
-                          let textSize: "sm" | "md" | "lg" = "sm";
 
                           if (distance === -1) {
                             // Default / no playback
                             dynamicClasses =
                               "text-white/70 opacity-60 scale-100 blur-none";
                             fontWeight = 500;
-                            textSize = "sm";
                           } else if (distance === 0) {
                             // Spotify Highlight: 100% visible, bright pink glow
                             dynamicClasses =
-                              "text-pink-400 opacity-100 scale-105 sm:scale-110 blur-none drop-shadow-[0_0_14px_rgba(244,114,182,0.5)]";
-                            fontWeight = 800;
-                            textSize = "lg";
+                              "text-pink-400 opacity-100 scale-105 blur-none drop-shadow-[0_0_14px_rgba(244,114,182,0.5)]";
+                            fontWeight = 700;
                           } else if (distance === 1) {
                             // Dekat highlight: transparansi sedikit menghilang (~65% opacity)
                             dynamicClasses =
                               "text-white/80 opacity-65 scale-100 blur-none";
                             fontWeight = 600;
-                            textSize = "md";
                           } else if (distance === 2) {
                             // Transisi sedang: ~30% opacity, minimal blur
                             dynamicClasses =
-                              "text-white/50 opacity-30 scale-[0.96] blur-[1px]";
+                              "text-white/50 opacity-30 scale-[0.98] blur-[1px]";
                             fontWeight = 500;
-                            textSize = "sm";
                           } else {
                             // 100% keluar / jauh: 90% hilang (10% opacity) & agak blur
                             dynamicClasses =
-                              "text-white/40 opacity-10 scale-[0.92] blur-[2px]";
+                              "text-white/40 opacity-10 scale-[0.95] blur-[2px]";
                             fontWeight = 400;
-                            textSize = "sm";
                           }
 
                           return (
@@ -1347,8 +1341,8 @@ export function LyricsEmbedderCore() {
                               key={idx}
                               data-lyric-index={idx}
                               fw={fontWeight}
-                              size={textSize}
-                              className={`transition-all duration-700 ease-out transform-gpu will-change-transform max-w-[88%] text-center select-none py-1.5 ${dynamicClasses}`}
+                              size="md"
+                              className={`transition-all duration-700 ease-out transform-gpu will-change-transform w-full max-w-full px-4 sm:px-6 text-center select-none py-1.5 leading-relaxed tracking-wide ${dynamicClasses}`}
                             >
                               {lyric.text}
                             </Text>
