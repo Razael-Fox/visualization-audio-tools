@@ -148,6 +148,7 @@ export function LyricsEmbedderCore() {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const requestRef = useRef<number>(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const theme = useMantineTheme();
   const colorScheme = useComputedColorScheme("dark");
 
@@ -452,7 +453,19 @@ export function LyricsEmbedderCore() {
     } catch (err: unknown) {
       console.error(err);
       const errMsg = err instanceof Error ? err.message : String(err);
-      setEmbedError(`Failed to paste from clipboard: ${errMsg}`);
+      const isPermissionBlocked =
+        errMsg.toLowerCase().includes("permissions policy") ||
+        errMsg.toLowerCase().includes("notallowederror") ||
+        errMsg.toLowerCase().includes("permission");
+
+      if (isPermissionBlocked) {
+        setEmbedError(
+          "Akses Clipboard diblokir oleh kebijakan keamanan browser/iframe. Kolom teks telah difokuskan — silakan lakukan tempel manual (Ctrl+V / Cmd+V / Tahan & Tempel).",
+        );
+      } else {
+        setEmbedError(`Gagal mengambil dari clipboard: ${errMsg}`);
+      }
+      textareaRef.current?.focus();
     }
   };
 
@@ -885,6 +898,7 @@ export function LyricsEmbedderCore() {
                   </div>
 
                   <Textarea
+                    ref={textareaRef}
                     placeholder="[00:10.50]Line 1
 [00:15.20]Line 2
 ... or paste unsynchronized text here to sync it."
