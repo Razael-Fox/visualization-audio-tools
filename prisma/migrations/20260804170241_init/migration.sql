@@ -1,0 +1,8 @@
+-- CreateTable
+CREATE TABLE "User" (
+    "id" BIGINT NOT NULL PRIMARY KEY,
+    "username" TEXT,
+    "quota" INTEGER NOT NULL DEFAULT 5,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);

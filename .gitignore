@@ -47,3 +47,5 @@ next-env.d.ts
 
 # AI Agents
 .agents/
+
+/src/generated/prisma
