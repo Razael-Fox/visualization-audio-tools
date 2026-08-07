@@ -8,8 +8,8 @@ if (!BOT_TOKEN) {
   console.error("BOT_TOKEN is missing in environment variables!");
 }
 
-// Use the NAT VPS webhook server as a proxy to bypass local network blocks
-const TELEGRAM_API_URL = process.env.TELEGRAM_API_PROXY || 'https://webhook.purplefoxbot.xyz/proxy';
+// Use direct Telegram API if proxy is not set
+const TELEGRAM_API_URL = process.env.TELEGRAM_API_PROXY || `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 export async function getFileUrl(fileId: string): Promise<string | null> {
   try {
