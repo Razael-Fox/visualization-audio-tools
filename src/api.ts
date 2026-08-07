@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import axios from 'axios';
+import FormData from 'form-data';
 dotenv.config();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
@@ -56,17 +57,33 @@ export async function sendVideo(chatId: number, videoUrl: string, options?: any)
 
 export async function sendVideoStream(chatId: number, videoStream: any, options?: any) {
     try {
-      const response = await axios.post(`${TELEGRAM_API_URL}/sendVideo`, {
-        chat_id: chatId,
-        video: videoStream,
-        ...options,
-      }, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      const form = new FormData();
+      form.append('chat_id', chatId);
+      
+      const knownLength = options?.knownLength;
+      const opts = { ...options };
+      delete opts.knownLength;
+      
+      form.append('video', videoStream, { 
+        filename: 'video.mp4',
+        ...(knownLength ? { knownLength } : {})
+      });
+      
+      for (const key of Object.keys(opts)) {
+        if (opts[key] !== undefined) {
+          form.append(key, opts[key]);
         }
+      }
+
+      const response = await axios.post(`${TELEGRAM_API_URL}/sendVideo`, form, {
+        headers: form.getHeaders(),
+        // Support large uploads without timing out prematurely
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity
       });
       return response.data;
     } catch (error) {
       console.error('Error sending video stream:', error);
+      throw error;
     }
 }

@@ -38,7 +38,13 @@ export async function handleAudio(message: any) {
     });
 
     const userName = message.from?.first_name || 'there';
-    await sendVideoStream(chatId, response.data, { caption: `✅ Here is your visualization, ${userName}! 🌸✨` });
+    const contentLength = response.headers['content-length'];
+    const knownLength = contentLength ? parseInt(contentLength as string, 10) : undefined;
+    
+    await sendVideoStream(chatId, response.data, { 
+      caption: `✅ Here is your visualization, ${userName}! 🌸✨`,
+      knownLength 
+    });
   } catch (error) {
     console.error('Error generating visualization:', error);
     await sendMessage(chatId, "❌ An error occurred while generating your visualization.");
