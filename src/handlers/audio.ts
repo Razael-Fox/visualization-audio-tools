@@ -37,7 +37,8 @@ export async function handleAudio(message: any) {
       responseType: 'stream'
     });
 
-    await sendVideoStream(chatId, response.data, { caption: "✅ Your visualization is ready!" });
+    const userName = message.from?.first_name || 'there';
+    await sendVideoStream(chatId, response.data, { caption: `✅ Here is your visualization, ${userName}! 🌸✨` });
   } catch (error) {
     console.error('Error generating visualization:', error);
     await sendMessage(chatId, "❌ An error occurred while generating your visualization.");

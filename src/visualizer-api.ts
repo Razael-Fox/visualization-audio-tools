@@ -99,8 +99,8 @@ const { width, height, fps, videoKbps, audioKbps } = plan;
       '-y',
       '-i', inputPath,
       '-filter_complex',
-      `color=c=#000011:r=${fps}:s=${size}:d=1[bg];` +
-        `[0:a]showwaves=s=${size}:mode=cline:rate=${fps}:colors=0x4da6ff[fg];` +
+      `color=c=#2b112c:r=${fps}:s=${size}:d=1[bg];` +
+        `[0:a]showfreqs=s=${size}:mode=bar:ascale=log:fscale=log:colors=0xff99cc|0xcc99ff:win_size=4096:overlap=0.8:averaging=3:cmode=separate[fg];` +
         '[bg][fg]overlay=shortest=0:format=auto[out]',
       '-map', '[out]',
       '-map', '0:a',
