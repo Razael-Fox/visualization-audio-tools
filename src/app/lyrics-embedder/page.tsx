@@ -20,7 +20,7 @@ export default function LyricsEmbedderPage() {
         Lyrics Audio Embedder
       </Title>
       <Text c="dimmed" mb="xl">
-        Add lyrics directly inside your music files (.mp3). You can upload a
+        Add lyrics directly inside your music files (.mp3, .opus, .flac, .m4a, .ogg). You can upload a
         .lrc file for scrolling karaoke-style lyrics, a .txt file for standard
         static text, or use our interactive tool to sync them manually.
       </Text>
@@ -38,10 +38,8 @@ export default function LyricsEmbedderPage() {
         radius="md"
       >
         <ReactMarkdown className="text-sm font-sans leading-relaxed">
-          Currently, this tool only supports embedding lyrics into **.mp3**
-          files (using ID3v2.3 tags). Support for other audio formats (such as
-          .opus, .ogg, .m4a, and .flac) is planned and will be added in a future
-          update.
+          This tool natively supports embedding lyrics into **.mp3, .opus, .flac, .m4a, and .ogg** audio files.
+          Standard ID3v2.3 tags are used for MP3s, while other formats use their respective native metadata tags (like Vorbis Comments).
         </ReactMarkdown>
       </Alert>
     </Container>

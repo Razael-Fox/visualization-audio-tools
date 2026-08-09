@@ -74,6 +74,7 @@ import { useUsageLimit } from "@/hooks/useUsageLimit";
 // We import browser-id3-writer dynamically or normally. Since it's client-side only, we can import it.
 // To avoid SSR issues with Node APIs if any, we'll wrap the writing logic safely.
 import { ID3Writer } from "browser-id3-writer";
+import { MusicFile } from "music-tag-native";
 
 interface SyncedLyric {
   time: number; // in seconds
@@ -713,70 +714,118 @@ export function LyricsEmbedderCore() {
     setEmbedProgress("embedding");
     setEmbedError(null);
 
+    const isMp3 =
+      audioFile.name.toLowerCase().endsWith(".mp3") ||
+      audioFile.type === "audio/mpeg" ||
+      audioFile.type === "audio/mp3";
+
     try {
       const arrayBuffer = await audioFile.arrayBuffer();
-      const writer = new ID3Writer(arrayBuffer);
 
-      // 1. Write back existing metadata to avoid losing it
-      if (metadata) {
-        if (metadata.title) writer.setFrame("TIT2", metadata.title);
-        if (metadata.artist) writer.setFrame("TPE1", [metadata.artist]);
-        if (metadata.album) writer.setFrame("TALB", metadata.album);
-        if (metadata.year) {
-          const yearNum = parseInt(metadata.year, 10);
-          if (!isNaN(yearNum)) {
-            writer.setFrame("TYER", yearNum);
+      if (isMp3) {
+        const writer = new ID3Writer(arrayBuffer);
+
+        // 1. Write back existing metadata to avoid losing it
+        if (metadata) {
+          if (metadata.title) writer.setFrame("TIT2", metadata.title);
+          if (metadata.artist) writer.setFrame("TPE1", [metadata.artist]);
+          if (metadata.album) writer.setFrame("TALB", metadata.album);
+          if (metadata.year) {
+            const yearNum = parseInt(metadata.year, 10);
+            if (!isNaN(yearNum)) {
+              writer.setFrame("TYER", yearNum);
+            }
           }
-        }
-        if (metadata.genre) writer.setFrame("TCON", [metadata.genre]);
-        if (metadata.track) writer.setFrame("TRCK", metadata.track);
+          if (metadata.genre) writer.setFrame("TCON", [metadata.genre]);
+          if (metadata.track) writer.setFrame("TRCK", metadata.track);
 
-        if (metadata.picture) {
-          const uint8 = new Uint8Array(metadata.picture.data);
-          writer.setFrame("APIC", {
-            type: 3,
-            data: uint8.buffer,
-            description: "Cover Front",
+          if (metadata.picture) {
+            const uint8 = new Uint8Array(metadata.picture.data);
+            writer.setFrame("APIC", {
+              type: 3,
+              data: uint8.buffer,
+              description: "Cover Front",
+            });
+          }
+        } else {
+          // Fallback title to audio filename
+          writer.setFrame(
+            "TIT2",
+            audioFileName?.replace(/\.[^/.]+$/, "") || "Untitled",
+          );
+        }
+
+        // 2. Format unsynchronized lyrics text (USLT)
+        // Strip timestamps for clean reading
+        const cleanLyricsText = lyricsText
+          .replace(/\[\d+:\d+(?:\.\d+)?\]/g, "")
+          .trim();
+        writer.setFrame("USLT", {
+          language: "eng",
+          description: "Lyrics",
+          lyrics: cleanLyricsText,
+        });
+
+        // 3. If there are synchronized lyrics, write the SYLT frame
+        if (syncedLyrics.length > 0) {
+          writer.setFrame("SYLT", {
+            language: "eng",
+            timestampFormat: 2, // Absolute time in milliseconds
+            type: 1, // Lyrics
+            description: "Lyrics Sync",
+            text: syncedLyrics.map(
+              (item) => [item.text, Math.round(item.time * 1000)] as const,
+            ),
           });
         }
+
+        // Write tags and build file blob
+        const taggedBuffer = writer.addTag();
+        const blob = new Blob([taggedBuffer], { type: "audio/mpeg" });
+        const url = URL.createObjectURL(blob);
+
+        setDownloadUrl(url);
       } else {
-        // Fallback title to audio filename
-        writer.setFrame(
-          "TIT2",
-          audioFileName?.replace(/\.[^/.]+$/, "") || "Untitled",
-        );
-      }
+        // Use music-tag-native for Opus, Ogg, Flac, M4A, etc.
+        const buffer = new Uint8Array(arrayBuffer);
+        const musicFile = MusicFile.loadSync(buffer);
 
-      // 2. Format unsynchronized lyrics text (USLT)
-      // Strip timestamps for clean reading
-      const cleanLyricsText = lyricsText
-        .replace(/\[\d+:\d+(?:\.\d+)?\]/g, "")
-        .trim();
-      writer.setFrame("USLT", {
-        language: "eng",
-        description: "Lyrics",
-        lyrics: cleanLyricsText,
-      });
+        // 1. Write back existing metadata if any was updated
+        if (metadata) {
+          if (metadata.title) musicFile.title = metadata.title;
+          if (metadata.artist) musicFile.artist = metadata.artist;
+          if (metadata.album) musicFile.album = metadata.album;
+          if (metadata.year) {
+            const yearNum = parseInt(metadata.year, 10);
+            if (!isNaN(yearNum)) musicFile.year = yearNum;
+          }
+          if (metadata.genre) musicFile.genre = metadata.genre;
+          if (metadata.track) {
+            const trackNum = parseInt(metadata.track, 10);
+            if (!isNaN(trackNum)) musicFile.trackNumber = trackNum;
+          }
+        } else {
+          if (!musicFile.title) {
+             musicFile.title = audioFileName?.replace(/\.[^/.]+$/, "") || "Untitled";
+          }
+        }
 
-      // 3. If there are synchronized lyrics, write the SYLT frame
-      if (syncedLyrics.length > 0) {
-        writer.setFrame("SYLT", {
-          language: "eng",
-          timestampFormat: 2, // Absolute time in milliseconds
-          type: 1, // Lyrics
-          description: "Lyrics Sync",
-          text: syncedLyrics.map(
-            (item) => [item.text, Math.round(item.time * 1000)] as const,
-          ),
+        // 2. For non-MP3 files like Vorbis Comments, LRC format is universally accepted
+        let lrcText = lyricsText.trim();
+        if (syncedLyrics.length === 0) {
+          lrcText = lyricsText.replace(/\[\d+:\d+(?:\.\d+)?\]/g, "").trim();
+        }
+        musicFile.lyrics = lrcText;
+
+        const modifiedBuffer = await musicFile.save(buffer);
+        const blob = new Blob([modifiedBuffer], {
+          type: audioFile.type || "audio/ogg",
         });
+        const url = URL.createObjectURL(blob);
+
+        setDownloadUrl(url);
       }
 
-      // Write tags and build file blob
-      const taggedBuffer = writer.addTag();
-      const blob = new Blob([taggedBuffer], { type: "audio/mpeg" });
-      const url = URL.createObjectURL(blob);
-
-      setDownloadUrl(url);
       setEmbedProgress("success");
     } catch (err: unknown) {
       console.error(err);
@@ -790,7 +839,8 @@ export function LyricsEmbedderCore() {
     if (!audioFileName) return "song_with_lyrics.mp3";
     const dotIndex = audioFileName.lastIndexOf(".");
     if (dotIndex === -1) return `${audioFileName}_with_lyrics.mp3`;
-    return `${audioFileName.substring(0, dotIndex)}_with_lyrics.mp3`;
+    const ext = audioFileName.substring(dotIndex);
+    return `${audioFileName.substring(0, dotIndex)}_with_lyrics${ext}`;
   };
 
   return (
@@ -827,7 +877,7 @@ export function LyricsEmbedderCore() {
           <Group gap="xs">
             <FileButton
               onChange={handleAudioUpload}
-              accept="audio/mpeg,audio/mp3"
+              accept="audio/*"
             >
               {(props) => (
                 <Button
@@ -836,7 +886,7 @@ export function LyricsEmbedderCore() {
                   variant="light"
                   color="pink"
                 >
-                  Upload Music (.mp3)
+                  Upload Music
                 </Button>
               )}
             </FileButton>
