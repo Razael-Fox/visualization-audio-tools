@@ -2,7 +2,8 @@
 set -e
 
 DOMAIN="api-vant.s.razael-fox.my.id"
-TUNNEL_NAME="vant"
+TUNNEL_NAME="api-vant"
+OLD_TUNNEL_NAME="vant"
 PORT="3099"
 
 echo "=== VANT Cloudflare Tunnel Setup ==="
@@ -22,13 +23,22 @@ else
     echo "Already authenticated."
 fi
 
-echo "[2/4] Creating tunnel '$TUNNEL_NAME'..."
+echo "[2/4] Cleaning up old tunnel..."
+if cloudflared tunnel list | grep -w -q "$OLD_TUNNEL_NAME"; then
+    echo "Found old tunnel '$OLD_TUNNEL_NAME'. Deleting it to prevent conflicts..."
+    # Attempt to delete old DNS route if possible (might fail if already restored by user)
+    cloudflared tunnel route dns clean "vant.s.razael-fox.my.id" >/dev/null 2>&1 || true
+    # Force delete the old tunnel
+    cloudflared tunnel delete -f "$OLD_TUNNEL_NAME" || true
+fi
+
+echo "[3/4] Creating tunnel '$TUNNEL_NAME'..."
 cloudflared tunnel create "$TUNNEL_NAME" || echo "Tunnel might already exist, continuing..."
 
-echo "[3/4] Routing DNS to $DOMAIN..."
+echo "[4/4] Routing DNS to $DOMAIN..."
 cloudflared tunnel route dns "$TUNNEL_NAME" "$DOMAIN" || echo "DNS might already be routed, continuing..."
 
-echo "[4/4] Generating configuration..."
+echo "[5/5] Generating configuration..."
 TUNNEL_UUID=$(cloudflared tunnel list | grep -w "$TUNNEL_NAME" | awk '{print $1}')
 
 if [ -z "$TUNNEL_UUID" ]; then

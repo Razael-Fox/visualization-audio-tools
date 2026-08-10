@@ -11,7 +11,7 @@ module.exports = {
     {
       name: "cloudflare-tunnel",
       script: "cloudflared",
-      args: "tunnel run vant"
+      args: "tunnel run api-vant"
     }
   ]
 };
