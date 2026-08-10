@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-DOMAIN="vant.s.razael-fox.my.id"
+DOMAIN="api-vant.s.razael-fox.my.id"
 TUNNEL_NAME="vant"
 PORT="3099"
 
