@@ -79,7 +79,7 @@ app.post('/api/embed', upload.single('file'), async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3099;
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });

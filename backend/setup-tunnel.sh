@@ -3,7 +3,7 @@ set -e
 
 DOMAIN="vant.s.razael-fox.my.id"
 TUNNEL_NAME="vant"
-PORT="3001"
+PORT="3099"
 
 echo "=== VANT Cloudflare Tunnel Setup ==="
 
