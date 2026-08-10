@@ -793,7 +793,7 @@ export function LyricsEmbedderCore() {
           formData.append("metadata", JSON.stringify(metadata));
         }
 
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3099";
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api-vant.razael-fox.my.id";
         const res = await fetch(`${backendUrl}/api/embed`, {
           method: "POST",
           body: formData,
