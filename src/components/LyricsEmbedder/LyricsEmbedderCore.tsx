@@ -74,7 +74,6 @@ import { useUsageLimit } from "@/hooks/useUsageLimit";
 // We import browser-id3-writer dynamically or normally. Since it's client-side only, we can import it.
 // To avoid SSR issues with Node APIs if any, we'll wrap the writing logic safely.
 import { ID3Writer } from "browser-id3-writer";
-import { MusicFile } from "music-tag-native";
 
 interface SyncedLyric {
   time: number; // in seconds
@@ -786,43 +785,27 @@ export function LyricsEmbedderCore() {
 
         setDownloadUrl(url);
       } else {
-        // Use music-tag-native for Opus, Ogg, Flac, M4A, etc.
-        const buffer = new Uint8Array(arrayBuffer);
-        const musicFile = MusicFile.loadSync(buffer);
-
-        // 1. Write back existing metadata if any was updated
+        // Send to dedicated backend for processing
+        const formData = new FormData();
+        formData.append("file", audioFile);
+        formData.append("lyrics", lyricsText);
         if (metadata) {
-          if (metadata.title) musicFile.title = metadata.title;
-          if (metadata.artist) musicFile.artist = metadata.artist;
-          if (metadata.album) musicFile.album = metadata.album;
-          if (metadata.year) {
-            const yearNum = parseInt(metadata.year, 10);
-            if (!isNaN(yearNum)) musicFile.year = yearNum;
-          }
-          if (metadata.genre) musicFile.genre = metadata.genre;
-          if (metadata.track) {
-            const trackNum = parseInt(metadata.track, 10);
-            if (!isNaN(trackNum)) musicFile.trackNumber = trackNum;
-          }
-        } else {
-          if (!musicFile.title) {
-             musicFile.title = audioFileName?.replace(/\.[^/.]+$/, "") || "Untitled";
-          }
+          formData.append("metadata", JSON.stringify(metadata));
         }
 
-        // 2. For non-MP3 files like Vorbis Comments, LRC format is universally accepted
-        let lrcText = lyricsText.trim();
-        if (syncedLyrics.length === 0) {
-          lrcText = lyricsText.replace(/\[\d+:\d+(?:\.\d+)?\]/g, "").trim();
-        }
-        musicFile.lyrics = lrcText;
-
-        const modifiedBuffer = await musicFile.save(buffer);
-        const blob = new Blob([modifiedBuffer], {
-          type: audioFile.type || "audio/ogg",
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+        const res = await fetch(`${backendUrl}/api/embed`, {
+          method: "POST",
+          body: formData,
         });
-        const url = URL.createObjectURL(blob);
 
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to embed tags using backend.");
+        }
+
+        const modifiedBlob = await res.blob();
+        const url = URL.createObjectURL(modifiedBlob);
         setDownloadUrl(url);
       }
 
