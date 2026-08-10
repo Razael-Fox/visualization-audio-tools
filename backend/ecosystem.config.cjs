@@ -11,7 +11,7 @@ module.exports = {
     {
       name: "cloudflare-tunnel",
       script: "cloudflared",
-      args: "tunnel --url http://localhost:3001"
+      args: "tunnel run vant"
     }
   ]
 };
