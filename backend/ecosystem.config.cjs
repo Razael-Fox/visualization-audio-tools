@@ -7,6 +7,11 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 3001,
       }
+    },
+    {
+      name: "cloudflare-tunnel",
+      script: "cloudflared",
+      args: "tunnel --url http://localhost:3001"
     }
   ]
 };
