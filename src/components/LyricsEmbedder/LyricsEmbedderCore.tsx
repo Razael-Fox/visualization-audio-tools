@@ -1054,13 +1054,7 @@ export function LyricsEmbedderCore() {
                 <Tabs.List className="flex items-center gap-1.5 w-full overflow-x-auto scrollbar-none py-0.5 px-0.5 justify-center md:justify-start">
                   <Tabs.Tab
                     value="editor"
-                    className={`group relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 flex items-center cursor-pointer border ${
-                      activeTab === "editor"
-                        ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
-                        : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <div className="flex items-center pointer-events-none">
+                    leftSection={
                       <FileText
                         size={16}
                         className={
@@ -1069,28 +1063,26 @@ export function LyricsEmbedderCore() {
                             : "text-pink-400 group-hover:text-pink-300 transition-colors"
                         }
                       />
-                      <div className={`overflow-hidden transition-all duration-300 flex items-center whitespace-nowrap ${
-                        activeTab === "editor"
-                          ? "max-w-[120px] opacity-100 ml-2"
-                          : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2"
-                      }`}>
-                        Raw Editor
-                      </div>
-                    </div>
+                    }
+                    className={`group relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 flex items-center cursor-pointer border ${
+                      activeTab === "editor"
+                        ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
+                        : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <span className={`overflow-hidden transition-all duration-300 block whitespace-nowrap ${
+                      activeTab === "editor"
+                        ? "max-w-[120px] opacity-100 ml-1.5"
+                        : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-1.5"
+                    }`}>
+                      Raw Editor
+                    </span>
                   </Tabs.Tab>
 
                   <Tabs.Tab
                     value="sync"
                     disabled={!lyricsText.trim()}
-                    className={`group relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 flex items-center cursor-pointer border ${
-                      activeTab === "sync"
-                        ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
-                        : !lyricsText.trim()
-                          ? "border-transparent opacity-40 cursor-not-allowed text-gray-500"
-                          : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <div className="flex items-center pointer-events-none">
+                    leftSection={
                       <Clock
                         size={16}
                         className={
@@ -1099,28 +1091,28 @@ export function LyricsEmbedderCore() {
                             : "text-pink-400 group-hover:text-pink-300 transition-colors"
                         }
                       />
-                      <div className={`overflow-hidden transition-all duration-300 flex items-center whitespace-nowrap ${
-                        activeTab === "sync"
-                          ? "max-w-[120px] opacity-100 ml-2"
-                          : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2"
-                      }`}>
-                        Tap Sync Tool
-                      </div>
-                    </div>
+                    }
+                    className={`group relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 flex items-center cursor-pointer border ${
+                      activeTab === "sync"
+                        ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
+                        : !lyricsText.trim()
+                          ? "border-transparent opacity-40 cursor-not-allowed text-gray-500"
+                          : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <span className={`overflow-hidden transition-all duration-300 block whitespace-nowrap ${
+                      activeTab === "sync"
+                        ? "max-w-[120px] opacity-100 ml-1.5"
+                        : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-1.5"
+                    }`}>
+                      Tap Sync Tool
+                    </span>
                   </Tabs.Tab>
 
                   <Tabs.Tab
                     value="preview"
                     disabled={syncedLyrics.length === 0}
-                    className={`group relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 flex items-center cursor-pointer border ${
-                      activeTab === "preview"
-                        ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
-                        : syncedLyrics.length === 0
-                          ? "border-transparent opacity-40 cursor-not-allowed text-gray-500"
-                          : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <div className="flex items-center pointer-events-none">
+                    leftSection={
                       <Sparkles
                         size={16}
                         className={
@@ -1129,14 +1121,22 @@ export function LyricsEmbedderCore() {
                             : "text-pink-400 group-hover:text-pink-300 transition-colors"
                         }
                       />
-                      <div className={`overflow-hidden transition-all duration-300 flex items-center whitespace-nowrap ${
-                        activeTab === "preview"
-                          ? "max-w-[120px] opacity-100 ml-2"
-                          : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2"
-                      }`}>
-                        Live LRC Player
-                      </div>
-                    </div>
+                    }
+                    className={`group relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 flex items-center cursor-pointer border ${
+                      activeTab === "preview"
+                        ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
+                        : syncedLyrics.length === 0
+                          ? "border-transparent opacity-40 cursor-not-allowed text-gray-500"
+                          : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <span className={`overflow-hidden transition-all duration-300 block whitespace-nowrap ${
+                      activeTab === "preview"
+                        ? "max-w-[120px] opacity-100 ml-1.5"
+                        : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-1.5"
+                    }`}>
+                      Live LRC Player
+                    </span>
                   </Tabs.Tab>
                 </Tabs.List>
               </div>
