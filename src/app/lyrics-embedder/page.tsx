@@ -38,8 +38,8 @@ export default function LyricsEmbedderPage() {
         radius="md"
       >
         <ReactMarkdown className="text-sm font-sans leading-relaxed">
-          This tool natively supports embedding lyrics into **.mp3, .opus, .flac, .m4a, and .ogg** audio files.
-          Standard ID3v2.3 tags are used for MP3s, while other formats use their respective native metadata tags (like Vorbis Comments).
+          This tool supports embedding lyrics into **.mp3, .opus, .flac, .m4a, and .ogg** audio files.
+          Embedding into .mp3 files is processed natively, while other formats now utilize a dedicated backend server.
         </ReactMarkdown>
       </Alert>
     </Container>
