@@ -547,10 +547,10 @@ export function LyricsEmbedderCore() {
 
       if (isPermissionBlocked) {
         setEmbedError(
-          "Akses Clipboard diblokir oleh kebijakan keamanan browser/iframe. Kolom teks telah difokuskan — silakan lakukan tempel manual (Ctrl+V / Cmd+V / Tahan & Tempel).",
+          "Clipboard access is blocked by browser/iframe security policies. The text area is focused — please paste manually (Ctrl+V / Cmd+V / Long-press & Paste).",
         );
       } else {
-        setEmbedError(`Gagal mengambil dari clipboard: ${errMsg}`);
+        setEmbedError(`Failed to fetch from clipboard: ${errMsg}`);
       }
       textareaRef.current?.focus();
     }
@@ -956,7 +956,9 @@ export function LyricsEmbedderCore() {
                   <Badge
                     color="pink"
                     variant="light"
-                    leftSection={<Clock size={12} />}
+                    size="lg"
+                    h={34}
+                    leftSection={<Clock size={16} />}
                   >
                     {syncedLyrics.length} Synced Lines
                   </Badge>
@@ -1080,7 +1082,7 @@ export function LyricsEmbedderCore() {
 
                   <div className="flex flex-col gap-1 mt-1">
                     <Text size="xs" c="dimmed">
-                      atau paste dari clipboard:
+                      or paste from clipboard:
                     </Text>
                     <Button
                       variant="light"
@@ -1090,7 +1092,7 @@ export function LyricsEmbedderCore() {
                       className="self-start"
                       leftSection={<Clipboard size={14} />}
                     >
-                      Paste dari Clipboard
+                      Paste from Clipboard
                     </Button>
                   </div>
 
@@ -1102,6 +1104,7 @@ export function LyricsEmbedderCore() {
                     value={lyricsText}
                     onChange={(e) => handleLyricsTextChange(e.target.value)}
                     minRows={10}
+                    maxRows={15}
                     autosize
                     className="font-mono text-sm"
                   />
