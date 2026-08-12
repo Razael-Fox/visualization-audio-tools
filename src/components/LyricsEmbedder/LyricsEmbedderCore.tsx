@@ -297,6 +297,17 @@ export function LyricsEmbedderCore() {
     }
   }, [activeLyricIndex]);
 
+
+
+  // Output/Embed state
+  const [embedProgress, setEmbedProgress] = useState<
+    "idle" | "embedding" | "success" | "error"
+  >("idle");
+  const [limitError, setLimitError] = useState<string | null>(null);
+  const [betaWarning, setBetaWarning] = useState<boolean>(false);
+  const [embedError, setEmbedError] = useState<string | null>(null);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+
   // Scroll to limit error when it appears
   useEffect(() => {
     if (limitError && limitErrorRef.current) {
@@ -308,16 +319,6 @@ export function LyricsEmbedderCore() {
       }, 100);
     }
   }, [limitError]);
-
-
-
-  // Output/Embed state
-  const [embedProgress, setEmbedProgress] = useState<
-    "idle" | "embedding" | "success" | "error"
-  >("idle");
-  const [limitError, setLimitError] = useState<string | null>(null);
-  const [embedError, setEmbedError] = useState<string | null>(null);
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
   const [aiSyncLoading, setAiSyncLoading] = useState(false);
   const [aiSyncError, setAiSyncError] = useState<string | null>(null);
@@ -617,6 +618,12 @@ export function LyricsEmbedderCore() {
     setEmbedProgress("idle");
     setDownloadUrl(null);
 
+    if (!file.name.toLowerCase().endsWith(".mp3")) {
+      setBetaWarning(true);
+    } else {
+      setBetaWarning(false);
+    }
+
     if (!canUpload) {
       setLimitError(
         "You have reached the maximum upload limit for this session.",
@@ -896,6 +903,19 @@ export function LyricsEmbedderCore() {
               {limitError}
             </Alert>
           </div>
+        )}
+
+        {betaWarning && (
+          <Alert
+            icon={<AlertCircle size={16} />}
+            title="Beta Feature"
+            color="yellow"
+            variant="light"
+            withCloseButton
+            onClose={() => setBetaWarning(false)}
+          >
+            Embedding into formats other than .mp3 (such as .opus, .m4a) is still in beta. Your file might be damaged or corrupted after processing.
+          </Alert>
         )}
 
         {/* Title Header */}
