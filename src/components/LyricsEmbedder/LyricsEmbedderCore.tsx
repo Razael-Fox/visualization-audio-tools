@@ -1060,7 +1060,7 @@ export function LyricsEmbedderCore() {
                         : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <div className="flex items-center">
+                    <div className="flex items-center pointer-events-none">
                       <FileText
                         size={16}
                         className={
@@ -1075,9 +1075,6 @@ export function LyricsEmbedderCore() {
                           : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2"
                       }`}>
                         Raw Editor
-                        {activeTab === "editor" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-2" />
-                        )}
                       </div>
                     </div>
                   </Tabs.Tab>
@@ -1093,7 +1090,7 @@ export function LyricsEmbedderCore() {
                           : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <div className="flex items-center">
+                    <div className="flex items-center pointer-events-none">
                       <Clock
                         size={16}
                         className={
@@ -1108,9 +1105,6 @@ export function LyricsEmbedderCore() {
                           : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2"
                       }`}>
                         Tap Sync Tool
-                        {activeTab === "sync" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-2" />
-                        )}
                       </div>
                     </div>
                   </Tabs.Tab>
@@ -1126,7 +1120,7 @@ export function LyricsEmbedderCore() {
                           : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <div className="flex items-center">
+                    <div className="flex items-center pointer-events-none">
                       <Sparkles
                         size={16}
                         className={
@@ -1141,9 +1135,6 @@ export function LyricsEmbedderCore() {
                           : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2"
                       }`}>
                         Live LRC Player
-                        {activeTab === "preview" && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-2" />
-                        )}
                       </div>
                     </div>
                   </Tabs.Tab>
