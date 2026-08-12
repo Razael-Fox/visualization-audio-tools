@@ -276,6 +276,7 @@ export function LyricsEmbedderCore() {
   const stepProgressRef = useRef<HTMLDivElement | null>(null);
   const syncStatusCardRef = useRef<HTMLDivElement | null>(null);
   const autoSyncPanelRef = useRef<HTMLDivElement | null>(null);
+  const limitErrorRef = useRef<HTMLDivElement | null>(null);
 
   // Smooth scroll to active lyric without stutter on mobile
   useEffect(() => {
@@ -296,18 +297,19 @@ export function LyricsEmbedderCore() {
     }
   }, [activeLyricIndex]);
 
-  // Smooth scroll UP to player section when switching to preview tab
+  // Scroll to limit error when it appears
   useEffect(() => {
-    if (activeTab === "preview") {
-      const timer = setTimeout(() => {
-        playerSectionRef.current?.scrollIntoView({
+    if (limitError && limitErrorRef.current) {
+      setTimeout(() => {
+        limitErrorRef.current?.scrollIntoView({
           behavior: "smooth",
           block: "center",
         });
-      }, 150);
-      return () => clearTimeout(timer);
+      }, 100);
     }
-  }, [activeTab]);
+  }, [limitError]);
+
+
 
   // Output/Embed state
   const [embedProgress, setEmbedProgress] = useState<
@@ -555,9 +557,15 @@ export function LyricsEmbedderCore() {
         // Successfully got synced LRC from AI! Update states
         handleLyricsTextChange(data.lrc);
         setAiSyncSuccess(true);
-        // Switch to the preview tab after showing success message
+        // Switch to the preview tab and auto-focus player after showing success message
         setTimeout(() => {
           setActiveTab("preview");
+          setTimeout(() => {
+            playerSectionRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }, 150);
         }, 2000);
       } else {
         throw new Error("Invalid response from AI");
@@ -876,16 +884,18 @@ export function LyricsEmbedderCore() {
     <Card withBorder shadow="sm" radius="md" p="xl" className="w-full">
       <Stack gap="lg">
         {limitError && (
-          <Alert
-            icon={<AlertCircle size={16} />}
-            title="Upload limit reached"
-            color="red"
-            variant="light"
-            withCloseButton
-            onClose={() => setLimitError(null)}
-          >
-            {limitError}
-          </Alert>
+          <div ref={limitErrorRef}>
+            <Alert
+              icon={<AlertCircle size={16} />}
+              title="Upload limit reached"
+              color="red"
+              variant="light"
+              withCloseButton
+              onClose={() => setLimitError(null)}
+            >
+              {limitError}
+            </Alert>
+          </div>
         )}
 
         {/* Title Header */}
@@ -979,7 +989,7 @@ export function LyricsEmbedderCore() {
                 </Group>
               )}
 
-              <Group mt="sm">
+              <Group mt="sm" wrap="nowrap">
                 <ActionIcon
                   size="lg"
                   variant="filled"
@@ -1021,43 +1031,41 @@ export function LyricsEmbedderCore() {
               className="w-full"
             >
               <div className="w-full flex items-center justify-between gap-2 p-1.5 mb-2 bg-gray-900/80 dark:bg-dark-800/80 border border-gray-800/80 rounded-2xl backdrop-blur-xl shadow-inner">
-                <Tabs.List className="flex items-center gap-1.5 w-full overflow-x-auto scrollbar-none py-0.5 px-0.5">
+                <Tabs.List className="flex items-center gap-1.5 w-full overflow-x-auto scrollbar-none py-0.5 px-0.5 justify-center md:justify-start">
                   <Tabs.Tab
                     value="editor"
-                    leftSection={
-                      <FileText
-                        size={13}
-                        className={
-                          activeTab === "editor"
-                            ? "text-white"
-                            : "text-pink-400"
-                        }
-                      />
-                    }
-                    className={`group relative px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer border ${
+                    className={`group relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 flex items-center cursor-pointer border ${
                       activeTab === "editor"
                         ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
                         : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    Raw Editor
-                    {activeTab === "editor" && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    )}
+                    <div className="flex items-center">
+                      <FileText
+                        size={16}
+                        className={
+                          activeTab === "editor"
+                            ? "text-white"
+                            : "text-pink-400 group-hover:text-pink-300 transition-colors"
+                        }
+                      />
+                      <div className={`overflow-hidden transition-all duration-300 flex items-center whitespace-nowrap ${
+                        activeTab === "editor"
+                          ? "max-w-[120px] opacity-100 ml-2"
+                          : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2"
+                      }`}>
+                        Raw Editor
+                        {activeTab === "editor" && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-2" />
+                        )}
+                      </div>
+                    </div>
                   </Tabs.Tab>
 
                   <Tabs.Tab
                     value="sync"
-                    leftSection={
-                      <Clock
-                        size={13}
-                        className={
-                          activeTab === "sync" ? "text-white" : "text-pink-400"
-                        }
-                      />
-                    }
                     disabled={!lyricsText.trim()}
-                    className={`group relative px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer border ${
+                    className={`group relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 flex items-center cursor-pointer border ${
                       activeTab === "sync"
                         ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
                         : !lyricsText.trim()
@@ -1065,26 +1073,32 @@ export function LyricsEmbedderCore() {
                           : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    Tap Sync Tool
-                    {activeTab === "sync" && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    )}
+                    <div className="flex items-center">
+                      <Clock
+                        size={16}
+                        className={
+                          activeTab === "sync"
+                            ? "text-white"
+                            : "text-pink-400 group-hover:text-pink-300 transition-colors"
+                        }
+                      />
+                      <div className={`overflow-hidden transition-all duration-300 flex items-center whitespace-nowrap ${
+                        activeTab === "sync"
+                          ? "max-w-[120px] opacity-100 ml-2"
+                          : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2"
+                      }`}>
+                        Tap Sync Tool
+                        {activeTab === "sync" && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-2" />
+                        )}
+                      </div>
+                    </div>
                   </Tabs.Tab>
 
                   <Tabs.Tab
                     value="preview"
-                    leftSection={
-                      <Sparkles
-                        size={13}
-                        className={
-                          activeTab === "preview"
-                            ? "text-white"
-                            : "text-pink-400"
-                        }
-                      />
-                    }
                     disabled={syncedLyrics.length === 0}
-                    className={`group relative px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer border ${
+                    className={`group relative px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-300 flex items-center cursor-pointer border ${
                       activeTab === "preview"
                         ? "bg-gradient-to-r from-pink-600 to-pink-500 text-white border-pink-400/30 shadow-sm shadow-pink-500/20 font-semibold"
                         : syncedLyrics.length === 0
@@ -1092,10 +1106,26 @@ export function LyricsEmbedderCore() {
                           : "border-transparent text-gray-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    Live LRC Player
-                    {activeTab === "preview" && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    )}
+                    <div className="flex items-center">
+                      <Sparkles
+                        size={16}
+                        className={
+                          activeTab === "preview"
+                            ? "text-white"
+                            : "text-pink-400 group-hover:text-pink-300 transition-colors"
+                        }
+                      />
+                      <div className={`overflow-hidden transition-all duration-300 flex items-center whitespace-nowrap ${
+                        activeTab === "preview"
+                          ? "max-w-[120px] opacity-100 ml-2"
+                          : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2"
+                      }`}>
+                        Live LRC Player
+                        {activeTab === "preview" && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-2" />
+                        )}
+                      </div>
+                    </div>
                   </Tabs.Tab>
                 </Tabs.List>
               </div>
