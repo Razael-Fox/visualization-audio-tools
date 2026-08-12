@@ -1051,7 +1051,7 @@ export function LyricsEmbedderCore() {
               className="w-full"
             >
               <div className="w-full flex items-center justify-between gap-2 p-1.5 mb-2 bg-gray-900/80 dark:bg-dark-800/80 border border-gray-800/80 rounded-2xl backdrop-blur-xl shadow-inner">
-                <Tabs.List className="flex flex-nowrap items-center gap-1.5 w-full overflow-x-auto scrollbar-none py-0.5 px-0.5 justify-center md:justify-start">
+                <Tabs.List className="flex flex-nowrap items-center gap-1.5 w-full overflow-hidden py-0.5 px-0.5 justify-start">
                   <Tabs.Tab
                     value="editor"
                     leftSection={
