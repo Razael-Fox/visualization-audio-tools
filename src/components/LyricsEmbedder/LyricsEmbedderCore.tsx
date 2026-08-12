@@ -477,6 +477,7 @@ export function LyricsEmbedderCore() {
   // Synchronously update lyricsText and reset/update syncLines
   const handleLyricsTextChange = (text: string) => {
     setLyricsText(text);
+    if (downloadUrl) setDownloadUrl(null);
 
     const parsed = parseLRC(text);
     const lines = text
@@ -1493,31 +1494,29 @@ export function LyricsEmbedderCore() {
               )}
 
               <Group justify="center" gap="md" wrap="wrap">
-                <Button
-                  size="lg"
-                  color="pink"
-                  onClick={handleEmbedLyrics}
-                  loading={embedProgress === "embedding"}
-                  disabled={!audioFile || !lyricsText.trim()}
-                  className="px-4 sm:px-6 w-full sm:w-auto"
-                >
-                  Embed Lyrics to Audio
-                </Button>
-
-                {downloadUrl && (
-                  <div className="rgb-border-wrapper w-full sm:w-auto">
-                    <Button
-                      component="a"
-                      href={downloadUrl}
-                      download={getDownloadName()}
-                      size="lg"
-                      color="teal"
-                      leftSection={<Download size={18} />}
-                      className="px-4 sm:px-6 w-full sm:w-auto"
-                    >
-                      Download Synced Audio
-                    </Button>
-                  </div>
+                {downloadUrl ? (
+                  <Button
+                    component="a"
+                    href={downloadUrl}
+                    download={getDownloadName()}
+                    size="lg"
+                    color="teal"
+                    leftSection={<Download size={18} />}
+                    className="px-4 sm:px-6 w-full sm:w-auto"
+                  >
+                    Download Synced Audio
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    color="pink"
+                    onClick={handleEmbedLyrics}
+                    loading={embedProgress === "embedding"}
+                    disabled={!audioFile || !lyricsText.trim()}
+                    className="px-4 sm:px-6 w-full sm:w-auto"
+                  >
+                    Embed Lyrics to Audio
+                  </Button>
                 )}
               </Group>
             </Stack>
