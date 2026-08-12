@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import WaveSurfer from "wavesurfer.js";
+import Editor from "react-simple-code-editor";
 import {
   Button,
   Card,
@@ -169,6 +170,50 @@ const generateLRC = (items: SyncedLyric[]): string => {
       return `[${minStr}:${secStr}.${msStr}] ${line.text}`;
     })
     .join("\n");
+};
+
+// Syntax highlighter for LRC
+const highlightLRC = (code: string) => {
+  const lines = code.split("\n");
+  return lines.map((line, i) => {
+    const isLast = i === lines.length - 1;
+    const matchMetadata = line.match(/^(\[[a-zA-Z]+:)(.*)(\])$/);
+
+    let content;
+    if (matchMetadata) {
+      content = (
+        <React.Fragment>
+          <span className="text-pink-500">{matchMetadata[1]}</span>
+          <span className="text-pink-300">{matchMetadata[2]}</span>
+          <span className="text-pink-500">{matchMetadata[3]}</span>
+        </React.Fragment>
+      );
+    } else {
+      const timestampRegex = /(\[\d+:\d+(?:\.\d+)?\])/g;
+      const parts = line.split(timestampRegex);
+      content = parts.map((part, j) => {
+        if (part.match(timestampRegex)) {
+          return (
+            <span key={j} className="text-cyan-400 font-semibold">
+              {part}
+            </span>
+          );
+        }
+        return (
+          <span key={j} className="text-gray-100">
+            {part}
+          </span>
+        );
+      });
+    }
+
+    return (
+      <React.Fragment key={i}>
+        {content}
+        {!isLast && "\n"}
+      </React.Fragment>
+    );
+  });
 };
 
 export function LyricsEmbedderCore() {
@@ -1096,18 +1141,17 @@ export function LyricsEmbedderCore() {
                     </Button>
                   </div>
 
-                  <Textarea
-                    ref={textareaRef}
-                    placeholder="[00:10.50]Line 1
-[00:15.20]Line 2
-... or paste unsynchronized text here to sync it."
-                    value={lyricsText}
-                    onChange={(e) => handleLyricsTextChange(e.target.value)}
-                    minRows={10}
-                    maxRows={15}
-                    autosize
-                    className="font-mono text-sm"
-                  />
+                  <div className="rounded-md border border-gray-700 bg-gray-900/50 dark:bg-dark-700 overflow-y-auto max-h-[350px]">
+                    <Editor
+                      value={lyricsText}
+                      onValueChange={(code) => handleLyricsTextChange(code)}
+                      highlight={highlightLRC}
+                      padding={14}
+                      className="font-mono text-sm min-h-[220px]"
+                      textareaClassName="focus:outline-none"
+                      placeholder="[00:10.50]Line 1&#10;[00:15.20]Line 2&#10;... or paste unsynchronized text here to sync it."
+                    />
+                  </div>
                 </Stack>
               </Tabs.Panel>
 
@@ -1328,9 +1372,7 @@ export function LyricsEmbedderCore() {
                           mt="xs"
                         />
                         <Text size="xs" c="dimmed" mt="xs">
-                          Tip: Use spacebar to play/pause the audio. Adjust
-                          timestamps dynamically if they are slightly off using
-                          the + / - buttons next to each line.
+                          Tip: Press Spacebar to play/pause. Use the + and - buttons next to a line to fine-tune its timing by 0.25 seconds.
                         </Text>
                       </Stack>
                     </Card>
